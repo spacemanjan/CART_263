@@ -2,61 +2,66 @@
 
 /*****************
 
-OOP Circle Eater
-Pippin Barr
+Title of Project
+Author Name
 
-An Object-Oriented version of the Circle Eater program.
-The player moves a circle around with the mouse.
-Another circle represents food which the player eats by overlapping.
-The player circle shrinks over time, but grows when it eats.
+This is a template. You must fill in the title,
+author, and this description to match your project!
 
 ******************/
-
-// Constants for key quantities
-const AVATAR_MAX_SIZE = 64;
-const AVATAR_SIZE_LOSS_PER_FRAME = 1;
-const FOOD_MIN_SIZE = 5;
-const FOOD_MAX_SIZE = 100;
-
-// Variables to store the two key objects
-let avatar;
-let food;
+let player;
+let words;
+let foodies = [];
 
 
+// constant
+//
+const FOOD_SPEED = 10;
+let food = 100;
 // preload()
 //
-// Not needed
+// not necessary for this assignment
 
 function preload() {
-
 }
 
 
 // setup()
 //
-// Create the canvas, avatar, and food, disable the cursor
+// Description of setup
 
 function setup() {
-  createCanvas(windowWidth,windowHeight);
-  avatar = new Avatar(mouseX,mouseY,AVATAR_MAX_SIZE,AVATAR_SIZE_LOSS_PER_FRAME)
-  food = new Food(random(0,width),random(0,height),FOOD_MIN_SIZE,FOOD_MAX_SIZE);
-  noCursor();
+	createCanvas(windowWidth,windowHeight);
+	player = new Avatar (this.x,this.y,80,1,);
+	//x,y,size
+	words = new Words(windowWidth/2,windowHeight/2);
+	for (let i = 0; i < food ; i++){
+
+	foodies.push(new Food (random(0,width),random(0,height),40,90,'#F0FF00'));
+}
 }
 
 
 // draw()
 //
-// Clear the background
-// Update the avatar and check for eating
-// Display the avatar and food
+// Description of draw()
 
 function draw() {
-  background(0);
-
-  avatar.update();
-  if (avatar.collide(food)) {
-    avatar.eat(food);
-  }
-  avatar.display();
-  food.display();
+	background(50,10,70);
+	words.display();
+	player.display();
+	player.update();
+	if (player.collide(foodies)) {
+		player.eat(foodies);
+	}
+	for (let i = 0; i < food ; i++){
+	foodies[i].display();
+	foodies[i].update();
+}
+	for (let i = 0; i < food; i++){
+		if (player.collide(foodies[i])){
+			foodies[i].reset();
+			player.eat(foodies[i]);
+		}
+	}
 }

@@ -1,28 +1,36 @@
-// Food
-//
-// A class to represent food, mostly just involves the ability to be
-// a random size and to reset
-
 class Food extends Agent {
+	constructor (x,y,minSize,maxSize,vx,vy,maxSpeed) {
+		super(x,y, random(minSize,maxSize),'#F0FF00');
+		this.minSize = minSize;
+		this.maxSize = maxSize;
+		this.maxSpeed = FOOD_SPEED;
+		this.vx = random(-this.maxSpeed, this.maxSpeed);
+		this.vy = random(-this.maxSpeed, this.maxSpeed);
+	}
 
-  // Constructor
-  //
-  // Pass arguments on to the super() constructor (e.g. for Agent)
-  // Also set a minimum and maximum size for this food object which it
-  // will vary between when it resets
-  constructor(x,y,minSize,maxSize) {
-    super(x,y,random(minSize,maxSize),'#55cccc');
-    this.minSize = minSize;
-    this.maxSize = maxSize;
-  }
+	update() {
+		this.x += this.vx;
+		this.y += this.vy;
 
-  // reset()
-  //
-  // Set position to a random location on the canvas
-  // Set the size to a random size within the limits
-  reset() {
-    this.x = random(0,width);
-    this.y = random(0,height);
-    this.size = random(this.minSize,this.maxSize);
-  }
+		// Wrapper (makes sure the food stays on screen)
+		if (this.x > width){
+			this.x -= width;
+		} else if (this.x < 0){
+			this.x += width;
+		}
+		if (this.y > height){
+			this.y -= height;
+		} else if (this.y < 0){
+			this.y += height;
+		}
+
+	}
+
+	reset() {
+		this.x = random(0,width);
+		this.y = random(0,height);
+		this.size = random(this.minSize, this.maxSize);
+		this.vx = random(-this.maxSpeed, this.maxSpeed);
+		this.vy = random(-this.maxSpeed, this.maxSpeed);
+	}
 }
