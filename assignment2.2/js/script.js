@@ -17,7 +17,7 @@ let foodies = [];
 // constant
 //
 const FOOD_SPEED = 10;
-let food = 100;
+const AMOUNT_FOOD = 100;
 // preload()
 //
 // not necessary for this assignment
@@ -35,7 +35,7 @@ function setup() {
 	player = new Avatar (this.x,this.y,80,1,);
 	//x,y,size
 	words = new Words(windowWidth/2,windowHeight/2);
-	for (let i = 0; i < food ; i++){
+	for (let i = 0; i < AMOUNT_FOOD ; i++){
 
 	foodies.push(new Food (random(0,width),random(0,height),40,90,'#F0FF00'));
 }
@@ -54,11 +54,11 @@ function draw() {
 	if (player.collide(foodies)) {
 		player.eat(foodies);
 	}
-	for (let i = 0; i < food ; i++){
+	for (let i = 0; i < AMOUNT_FOOD ; i++){
 	foodies[i].display();
 	foodies[i].update();
 }
-	for (let i = 0; i < food; i++){
+	for (let i = 0; i < AMOUNT_FOOD; i++){
 		if (player.collide(foodies[i])){
 			foodies[i].reset();
 			player.eat(foodies[i]);

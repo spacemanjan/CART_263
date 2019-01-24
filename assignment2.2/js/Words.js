@@ -6,9 +6,6 @@ class Words{
 	}
 
 display(){
-	if (!this.active){
-		return;
-	}
 
 	if (player.count >= 100 && player.count <= 250){
 	stroke(50);

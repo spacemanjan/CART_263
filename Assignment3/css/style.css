@@ -1,0 +1,36 @@
+/*********************************************
+
+This is the style file for this project.
+
+**********************************************/
+div {
+  margin-bottom: 20px;
+  font-size: 1em;
+  margin-left:180px;
+  margin-right:180px;
+}
+body{
+  margin-top: 20px;
+  padding: 10px;
+  font-family: 'PT Mono', monospace;
+}
+.redacted{
+	background-color: black;
+	color: rgb(0,0,0,0);
+}
+.revealed{
+	background-color: rgb(0,0,0,0);
+	color: rgb(255,0,0);
+	text-decoration: underline;
+}
+.hidden{
+}
+.found{
+	background-color: rgb(255,211,0,0.5);
+}
+.not-finish{
+	color: rgb(0,0,0,0);
+}
+.finish{
+	color: rgb(0,0,0);
+}
