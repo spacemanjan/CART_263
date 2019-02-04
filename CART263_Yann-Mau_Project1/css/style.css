@@ -1,0 +1,57 @@
+/*********************************************
+
+This is the style file for this project.
+
+**********************************************/
+body{
+	position:absolute;
+	width:100%;
+	height:100%;
+	margin:0;
+	pointer-events: none;
+}
+.keys {
+	display:inline-block;
+	padding-left:40px;
+}
+#triggerZone {
+	background-color: rgb(255,255,0,0.5);
+	position:absolute;
+	top:15%;
+	width:60%;
+	height:150px;
+}
+#smartZone {
+	position:absolute;
+	bottom:0;
+	width:100%;
+	height:100px;
+}
+#UP {
+	position:absolute;
+	width:10%;
+	bottom:0;
+}
+#one {
+	position:absolute;
+	width:10%;
+	bottom:0;
+}
+#two {
+	position:absolute;
+	width:10%;
+	bottom:0;
+	left:15%;
+}
+#three {
+	position:absolute;
+	width:10%;
+	bottom:0;
+	left:30%;
+}
+#four {
+	position:absolute;
+	width:10%;
+	bottom:0;
+	left:45%;
+}
