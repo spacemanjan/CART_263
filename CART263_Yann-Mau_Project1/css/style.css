@@ -8,18 +8,36 @@ body{
 	width:100%;
 	height:100%;
 	margin:0;
+	overflow: hidden;
 	/* pointer-events: none; */
 }
 .keys {
 	display:inline-block;
 	padding-left:40px;
 }
-#triggerZone {
-	background-color: rgb(255,255,0,0);
+.Instructions{
 	position:absolute;
-	top:15%;
-	width:60%;
-	height:150px;
+	text-align: center;
+	font-size:50px;
+	color:rgb(255,191,0);
+	top:20%;
+	right:20%;
+}
+.gone{
+	visibility: hidden;
+}
+#thinking{
+	position:absolute;
+	font-size:30px;
+	color:rgb(255, 191, 0);
+	right:10px;
+}
+#thought{
+	position:absolute;
+	font-size:30px;
+	color:rgb(255, 191, 0);
+	right:10px;
+	top:25px;
 }
 #smartZone {
 	position:absolute;
@@ -71,24 +89,24 @@ body{
 	width:10%;
 	bottom:0;
 }
-#one {
+.uparrow {
 	position:absolute;
 	width:10%;
-	top:1100px;
+	bottom:10%;
 }
-#two {
+.downarrow {
 	position:absolute;
 	width:10%;
 	bottom:0;
 	left:15%;
 }
-#three {
+.leftarrow {
 	position:absolute;
 	width:10%;
 	bottom:0;
 	left:30%;
 }
-#four {
+.rightarrow {
 	position:absolute;
 	width:10%;
 	bottom:0;
