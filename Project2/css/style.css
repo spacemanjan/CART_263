@@ -1,5 +1,24 @@
 /*********************************************
 
-This is the style file for this project.
+This is the style file for Child Avatar Maker 2019 Edition
 
 **********************************************/
+#head{
+	position:absolute;
+	left:37.5%;
+	top:15%;
+	width:250px;
+	z-index: 4;
+}
+#headAnimated{
+	position:absolute;
+	top:15%;
+	width:250px;
+	z-index: 4;
+}
+#torso{
+	position:absolute;
+	left:37.5%;
+	top:39%;
+	width:250px;
+}
