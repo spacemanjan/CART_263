@@ -18,6 +18,11 @@ let faces = [
 	'assets/images/head/goomba.png',
 	'assets/images/head/mario.png'
 ];
+let facesUnlock = [
+	'assets/images/head/clown.png',
+	'assets/images/head/bread.png',
+	'assets/images/head/shaggy.png'
+];
 let bodies = [
 
 ];
@@ -55,6 +60,10 @@ function setup() {
 
 	$torso = $( '#torso' );
 	$torso.on( 'click', toggle );
+
+	activeAnnyang();
+	// Start listening. You can call this here, or attach this call to an event, button, etc.
+	annyang.start();
 }
 
 //--------------=TOGGLE=--------------//
@@ -77,6 +86,7 @@ function toggle() {
 		left: "37.5%"
 	}, 1000 );
 	console.log(numClick);
+	console.log(facesUnlock);
 	stopPropogation();
 }
 
@@ -97,7 +107,29 @@ function changeImages() {
 
 //--------------=ADD_IMAGES=--------------//
 function addImages(){
-	if (numClick === 2){
-		console.log("muthafucka");
+	let faceImage = facesUnlock[ Math.floor( Math.random() * facesUnlock.length ) ];
+	if (numClick == 2 || numClick == 4){
+		faces.push(faceImage);
+		//removes the random image from the faces Unlock array
+		facesUnlock.splice($.inArray(faceImage, facesUnlock),1);
+		console.log(faceImage);
 	}
+}
+
+//--------------=ACTIVE_ANNYANG=--------------//
+function activeAnnyang(){
+	if ( annyang ){
+	var commands = {
+		'RESET':function(){
+			$head.attr('src','assets/images/head/mario.png');
+		},
+		'RANDOM':function(){
+			let randoFace = faces[ Math.floor( Math.random() * faces.length ) ];
+			$head.attr('src',randoFace);
+			console.log(faces.length);
+		}
+	}
+}
+	// Add our commands to annyang
+	annyang.addCommands( commands );
 }
