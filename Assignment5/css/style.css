@@ -1,0 +1,14 @@
+/*********************************************
+
+This is the style file for this project.
+
+**********************************************/
+#hide{
+	text-align: center;
+	font-size:100px;
+}
+.counter{
+	right:3%;
+	position:absolute;
+	font-size: 20px;
+}
