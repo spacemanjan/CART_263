@@ -13,7 +13,7 @@ Discover over 50 diffrent combinations that can be made with this fun project.
 
 //--------------=VARIABLES=--------------//
 //declare faces, bodies, hands, & feets arrays
-	//these arrays will hold the corresponding body part's library of images to chose from
+//these arrays will hold the corresponding body part's library of images to chose from
 let faces = [
 	'assets/images/head/goomba.png',
 	'assets/images/head/mario.png'
@@ -24,12 +24,21 @@ let facesUnlock = [
 	'assets/images/head/shaggy.png'
 ];
 let bodies = [
+	'assets/images/torso/body.png',
+];
+let bodiesUnlock= [
 
 ];
 let hands = [
 
 ];
+let handsUnlock = [
+
+];
 let feets = [
+
+];
+let feetsUnlock = [
 
 ];
 
@@ -42,12 +51,19 @@ let $legs;
 //variable numClick will track how many times a body part has been toggled
 let numClick = 0;
 
+//Load in sound track using Pizzicato
+//Pizzicato is the library I'm using to distort the sound
+let sound = new Pizzicato.Sound({
+	source: 'file',
+	options: { path: 'assets/sounds/fingerFamily.mp3', loop: true }
+});
+
 //--------------=START_PROGRAM=--------------//
 $( document ).ready( preload );
 
 //--------------=PRELOAD=--------------//
 //preload is called at the begining to make sure things are called not on load
-	//but only when the user is ready to play & clicks on the screen
+//but only when the user is ready to play & clicks on the screen
 function preload() {
 	//"on click launch setup"
 	$( 'HTML' ).click( setup );
@@ -55,6 +71,7 @@ function preload() {
 
 //--------------=SETUP=--------------//
 function setup() {
+	$('HTML').off();
 	$head = $( '#head' );
 	$head.on( 'click', toggle );
 
@@ -62,17 +79,18 @@ function setup() {
 	$torso.on( 'click', toggle );
 
 	activeAnnyang();
-	// Start listening. You can call this here, or attach this call to an event, button, etc.
-	annyang.start();
+
+	sound.play();
+
 }
 
 //--------------=TOGGLE=--------------//
 //toggle is the main function of Children's Avatar Maker 2019 Edition
-	//$(this) is the clicked id (#head, #torso, #arms, #legs)
-		//$(this) will be animated to go right off screen.
+//$(this) is the clicked id (#head, #torso, #arms, #legs)
+//$(this) will be animated to go right off screen.
 //At the completion of the first animation the changeImages function is called
-	//the css of $(this) is changed to -250 and then animated
-		//back to it's original position
+//the css of $(this) is changed to -250 and then animated
+//back to it's original position
 function toggle() {
 	//add 1 to the numClick variable
 	numClick += 1;
@@ -85,16 +103,18 @@ function toggle() {
 	$( this ).animate( {
 		left: "37.5%"
 	}, 1000 );
-	console.log(numClick);
-	console.log(facesUnlock);
+	console.log( numClick );
+	console.log( facesUnlock );
+	//distortSound is called here so that with each click it adds the current settings and distorts the sound with every click
+	distortSound();
 	stopPropogation();
 }
 
 //--------------=CHANGE_IMAGES=--------------//
 //change images is the second main function which works in conjuction with TOGGLE
-	//this function sets the css to the far left
+//this function sets the css to the far left
 //then the function checks what $(this) is either (#head, #torso, #arms, #legs)
-	//depending on which is selected, change the image to a new image
+//depending on which is selected, change the image to a new image
 function changeImages() {
 	let face = faces[ Math.floor( Math.random() * faces.length ) ];
 	$( this ).css( 'left', -250 );
@@ -106,30 +126,48 @@ function changeImages() {
 }
 
 //--------------=ADD_IMAGES=--------------//
-function addImages(){
+function addImages() {
 	let faceImage = facesUnlock[ Math.floor( Math.random() * facesUnlock.length ) ];
-	if (numClick == 2 || numClick == 4){
-		faces.push(faceImage);
+	if ( numClick == 2 || numClick == 4 ) {
+		faces.push( faceImage );
 		//removes the random image from the faces Unlock array
-		facesUnlock.splice($.inArray(faceImage, facesUnlock),1);
-		console.log(faceImage);
+		facesUnlock.splice( $.inArray( faceImage, facesUnlock ), 1 );
+		console.log( faceImage );
 	}
 }
 
 //--------------=ACTIVE_ANNYANG=--------------//
-function activeAnnyang(){
-	if ( annyang ){
-	var commands = {
-		'RESET':function(){
-			$head.attr('src','assets/images/head/mario.png');
-		},
-		'RANDOM':function(){
-			let randoFace = faces[ Math.floor( Math.random() * faces.length ) ];
-			$head.attr('src',randoFace);
-			console.log(faces.length);
+function activeAnnyang() {
+	if ( annyang ) {
+		var commands = {
+			'RESET': function() {
+				$head.attr( 'src', 'assets/images/head/mario.png' );
+			},
+			'RANDOM': function() {
+				let randoFace = faces[ Math.floor( Math.random() * faces.length ) ];
+				$head.attr( 'src', randoFace );
+				console.log( faces.length );
+			},
+			'DANCE': function() {
+				console.log( "dancetime" );
+			}
 		}
 	}
-}
 	// Add our commands to annyang
 	annyang.addCommands( commands );
+	// Start listening. You can call this here, or attach this call to an event, button, etc.
+	annyang.start();
+}
+
+//--------------=DISTORT_SOUND=--------------//
+//With these setting true distortion happens at 200 clicks
+function distortSound(){
+	let flanger = new Pizzicato.Effects.Flanger({
+	    time: 0.01,
+	    speed: 0.01,
+	    depth: 0.01,
+	    feedback: 0.01,
+	    mix: 0.01
+	});
+	sound.addEffect(flanger);
 }
