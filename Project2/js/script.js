@@ -58,6 +58,9 @@ let sound = new Pizzicato.Sound({
 	options: { path: 'assets/sounds/fingerFamily.mp3', loop: true }
 });
 
+//declare dancing so we can call it and set it to an interval & clearInterval 
+let dancing;
+
 //--------------=START_PROGRAM=--------------//
 $( document ).ready( preload );
 
@@ -149,7 +152,10 @@ function activeAnnyang() {
 				console.log( faces.length );
 			},
 			'DANCE': function() {
-				console.log( "dancetime" );
+				dancing = setInterval(dance, 500);
+			},
+			'STOP DANCING':function() {
+				clearInterval(dancing);
 			}
 		}
 	}
@@ -170,4 +176,8 @@ function distortSound(){
 	    mix: 0.01
 	});
 	sound.addEffect(flanger);
+}
+
+function dance(){
+	$head.effect("bounce", 500);
 }
