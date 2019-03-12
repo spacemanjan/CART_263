@@ -26,7 +26,7 @@ let facesUnlock = [
 let bodies = [
 	'assets/images/torso/body.png',
 ];
-let bodiesUnlock= [
+let bodiesUnlock = [
 
 ];
 let hands = [
@@ -53,12 +53,18 @@ let numClick = 0;
 
 //Load in sound track using Pizzicato
 //Pizzicato is the library I'm using to distort the sound
-let sound = new Pizzicato.Sound({
+let sound = new Pizzicato.Sound( {
 	source: 'file',
-	options: { path: 'assets/sounds/fingerFamily.mp3', loop: true }
-});
+	options: {
+		path: 'assets/sounds/fingerFamily.mp3',
+		loop: true
+	}
+} );
 
-//declare dancing so we can call it and set it to an interval & clearInterval 
+//sound Effects
+let nextSFX = new Audio("assets/sounds/next.wav");
+
+//declare dancing so we can call it and set it to an interval & clearInterval
 let dancing;
 
 //--------------=START_PROGRAM=--------------//
@@ -74,7 +80,7 @@ function preload() {
 
 //--------------=SETUP=--------------//
 function setup() {
-	$('HTML').off();
+	$( 'HTML' ).off();
 	$head = $( '#head' );
 	$head.on( 'click', toggle );
 
@@ -95,6 +101,7 @@ function setup() {
 //the css of $(this) is changed to -250 and then animated
 //back to it's original position
 function toggle() {
+	nextSFX.play();
 	//add 1 to the numClick variable
 	numClick += 1;
 	//first animation stage
@@ -152,10 +159,10 @@ function activeAnnyang() {
 				console.log( faces.length );
 			},
 			'DANCE': function() {
-				dancing = setInterval(dance, 500);
+				dancing = setInterval( dance, 500 );
 			},
-			'STOP DANCING':function() {
-				clearInterval(dancing);
+			'STOP DANCING': function() {
+				clearInterval( dancing );
 			}
 		}
 	}
@@ -167,17 +174,17 @@ function activeAnnyang() {
 
 //--------------=DISTORT_SOUND=--------------//
 //With these setting true distortion happens at 200 clicks
-function distortSound(){
-	let flanger = new Pizzicato.Effects.Flanger({
-	    time: 0.01,
-	    speed: 0.01,
-	    depth: 0.01,
-	    feedback: 0.01,
-	    mix: 0.01
-	});
-	sound.addEffect(flanger);
+function distortSound() {
+	let flanger = new Pizzicato.Effects.Flanger( {
+		time: 0.05,
+		speed: 0.05,
+		depth: 0.05,
+		feedback: 0.05,
+		mix: 0.05
+	} );
+	sound.addEffect( flanger );
 }
 
-function dance(){
-	$head.effect("bounce", 500);
+function dance() {
+	$head.effect( "bounce", 500 );
 }
