@@ -40,6 +40,27 @@ let pattern = ['x','*','xo*',' ','x','x','xo','*'];
 // Which beat of the pattern we're at right now
 let patternIndex = 0;
 
+let clicker = true;
+
+let random = Math.random();
+
+let quadrafuzz = new Pizzicato.Effects.Quadrafuzz({
+    lowGain: 0.6,
+    midLowGain: 0.8,
+    midHighGain: 0.5,
+    highGain: 0.6,
+});
+let lowPassFilter = new Pizzicato.Effects.LowPassFilter({
+    frequency: 400,
+    peak: 10
+});
+let highPassFilter = new Pizzicato.Effects.HighPassFilter({
+    frequency: 120,
+    peak: 10
+});
+let distortion = new Pizzicato.Effects.Distortion({
+    gain: 0.4
+});
 // setup()
 //
 // Creat canvas, set up the synth and sound files.
@@ -85,12 +106,23 @@ function setup() {
 // Using this to start the note and drum sequences to get around
 // user interaction (and to give the files time to load)
 function mousePressed() {
+if (clicker === true){
   // Start an interval for the notes
-  setInterval(playNote,NOTE_TEMPO);
   // Start an interval for the drums
   setInterval(playDrum,DRUM_TEMPO);
+  triggerNote();
+  effects();
+  clicker = false;
 }
 
+}
+
+function effects(){
+	synth.addEffect(highPassFilter);
+	kick.addEffect(lowPassFilter);
+	hihat.addEffect(quadrafuzz);
+	snare.addEffect(distortion);
+}
 // playNote
 //
 // Chooses a random frequency and assigns it to the synth
@@ -101,8 +133,19 @@ function playNote() {
   synth.frequency = frequency;
   // If it's note already play, play the synth
   synth.play();
+
+  if (random >= 0.5){
+	  synth.stop();
+  }
 }
 
+function triggerNote(){
+	let nextNote = NOTE_TEMPO * Math.ceil(Math.random()*5);
+	playNote();
+	setTimeout(triggerNote,nextNote);
+	console.log("hey");
+	console.log(nextNote);
+}
 // playDrum()
 //
 // Checks the string representing the drums for the current beat
@@ -131,5 +174,5 @@ function playDrum() {
 //
 // Nothing right now.
 
-function draw() {
+function draw(){
 }
