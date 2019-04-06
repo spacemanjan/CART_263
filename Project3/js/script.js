@@ -19,6 +19,9 @@ var titleButton;
 var player;
 var space;
 
+//SOUNDTRACK taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
+var soundTrack;
+
 //=======TILES==========//
 var tile;
 var newTile;
@@ -76,6 +79,9 @@ var game = new Phaser.Game( window.width, window.height, Phaser.AUTO, '', {
 //The Isometric Plugin is added in here, the worldBounds are set Here
 //The aracade Physics system is launched here.
 function preload() {
+	//-----------SOUNDS----------//
+	game.load.audio('music',['assets/sounds/PeacefulPiano.mp3']);
+
 	//-----------IMAGES-----------//
 	//********NEED TO CHANGE THE NAMES OF THESE CUZ THEY CONFUSING
 	game.load.image( 'title', 'assets/images/titleScreen.png' );
@@ -171,6 +177,14 @@ function create() {
 	] );
 	//space has to be specified because it is not included in the phaser cursor library
 	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
+
+	//----------MUSIC------------//
+	//add audio track "music" set it to the soundTrack variable
+	soundTrack = game.add.audio('music');
+	//set music looping to true
+	soundTrack.loop = true;
+	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
+	setTimeout(function(){ soundTrack.play(); }, 500);
 }
 
 //========UPDATE()========//
