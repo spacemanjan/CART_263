@@ -12,14 +12,20 @@ The important part is to have fun.
 
 ******************/
 //========VARIABLES========//
-//The various variables used in the game
+//The MISC variables used in the game
 var emitter;
 var title;
 var titleButton;
 var player;
+
+//=========KEYBOARD=======//
+var up;
+var left;
+var right;
+var down;
 var space;
 
-//SOUNDTRACK taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
+//==SOUNDTRACK==// taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
 var soundTrack;
 
 //=======TILES==========//
@@ -38,6 +44,10 @@ var isoGroup;
 var obstacleGroup;
 var eventGroup;
 var foodGroup;
+
+//========CONTROLS=======//
+//Variables used for controlling the player character
+var Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
 
 //========CONSTANTS========//
 //The constant variables used in game can be editted here
@@ -86,7 +96,6 @@ function preload() {
 	//********NEED TO CHANGE THE NAMES OF THESE CUZ THEY CONFUSING
 	game.load.image( 'title', 'assets/images/titleScreen.png' );
 	game.load.image( 'tile', 'assets/images/snowTile.png' );
-	game.load.image( 'player', 'assets/images/leftBunny222.png' );
 	game.load.image( 'dig', 'assets/images/dig.png' );
 	game.load.image( 'water', 'assets/images/water.png' );
 	game.load.image( 'rock', 'assets/images/rocks.png' );
@@ -96,14 +105,8 @@ function preload() {
 	game.load.image( 'step', 'assets/images/steps.png' );
 	game.load.image( 'tile2', 'assets/images/floor.png' );
 
-	// game.load.image('E', 'images/controls/E.png');
-	// game.load.image('N', 'images/controls/N.png');
-	// game.load.image('NE', 'images/controls/NE.png');
-	// game.load.image('NW', 'images/controls/NW.png');
-	// game.load.image('S', 'images/controls/S.png');
-	// game.load.image('SE', 'images/controls/SE.png');
-	// game.load.image('SW', 'images/controls/SW.png');
-	// game.load.image('W', 'images/controls/W.png');
+	//-----------PLAYER-ANIMATIONS-----------//
+	game.load.spritesheet( 'player', 'assets/images/leftBunny222.png' );
 
 	// This adds the Phaser Isometric Plugin
 	game.plugins.add( new Phaser.Plugin.Isometric( game ) );
@@ -164,7 +167,7 @@ function create() {
 	//snowEmitter creates the emitter of the snow particles
 	snowEmitter();
 
-	//-----------CONTROLS-------------//
+	//-----------KEYBOARD-------------//
 	// Set up our controls using the phaser cursor, which is an embeded controler
 	this.cursors = game.input.keyboard.createCursorKeys();
 	// Create a listener for the possible key presses
@@ -175,8 +178,25 @@ function create() {
 		Phaser.Keyboard.DOWN,
 		Phaser.Keyboard.SPACEBAR
 	] );
+	//KEYPRESS EVENTS *******Be more descriptive
 	//space has to be specified because it is not included in the phaser cursor library
 	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
+	//UP key press events used for animation and sprite control
+	up = game.input.keyboard.addKey( Phaser.Keyboard.UP );
+	up.onDown.add(inputDown,this);
+	up.onUp.add(inputUp,this);
+	//DOWN key 'ditto'
+	down = game.input.keyboard.addKey( Phaser.Keyboard.DOWN );
+	down.onDown.add(inputDown,this);
+	down.onUp.add(inputUp,this);
+	//LEFT key 'ditto'
+	left = game.input.keyboard.addKey( Phaser.Keyboard.LEFT );
+	left.onDown.add(inputDown,this);
+	left.onUp.add(inputUp,this);
+	//RIGHT key 'ditto'
+	right = game.input.keyboard.addKey( Phaser.Keyboard.RIGHT );
+	right.onDown.add(inputDown,this);
+	right.onUp.add(inputUp,this);
 
 	//----------MUSIC------------//
 	//add audio track "music" set it to the soundTrack variable
@@ -208,7 +228,6 @@ function update() {
 		cameraControl();
 
 		//-----------PLAYER CONTROLS------------//
-
 		if ( this.cursors.up.isDown ) {
 			player.body.velocity.y = -speed;
 		} else if ( this.cursors.down.isDown ) {
@@ -227,6 +246,7 @@ function update() {
 
 		// digging mechanic: if space is pressed then player is digging
 		//******should disable other inputs and play animation of player digging
+		//******IF GAME RUNS TOO LONG THIS FUCKS THE GAME UP LOOK INTO IT
 		space.onDown.add( function() {
 			digging = true;
 			//digging can't be true forever so set digging to false after 20 milliseconds with time event
@@ -251,7 +271,7 @@ function update() {
 
 	// console.log area
 	// this area is called wether or not start is true
-	console.log( digging );
+	// console.log( digging );
 }
 
 //=======VARIOUS-FUNCTIONS=========//
@@ -267,11 +287,11 @@ function snowEmitter() {
 	// define the various properties
 	emitter.minParticleScale = 0.3;
 	emitter.maxParticleScale = 1.9;
-	emitter.setYSpeed( 900 );
+	emitter.setYSpeed( 900 ); //900
 	emitter.setXSpeed( 5, 25 );
 	emitter.minRotation = 0;
 	emitter.maxRotation = 0;
-	emitter.maxParticles = 1000;
+	emitter.maxParticles = 10000;
 	// Emitter position & width, fix it to the camera so it's always snowing wherever you are
 	emitter.width = 1700;
 	emitter.fixedToCamera = true;
@@ -279,7 +299,7 @@ function snowEmitter() {
 	emitter.on = snowing;
 	// start the emitter and define its behavior
 	//start(explode, lifespan, frequency, quantity);
-	emitter.start( false, 1000, 1, 0 );
+	emitter.start( false, 1000, 0.5, 0 );
 }
 
 // overlapCheck is an event function which is checking if player is over the dig tile
@@ -325,6 +345,83 @@ function initPlayer() {
 	player.body.collideWorldBounds = true;
 }
 
+function inputDown(key){
+	if (key === up){
+		NEdown = true;
+	}
+	if (key === down){
+		SWdown = true;
+	}
+	if (key === left){
+		NWdown = true;
+	}
+	if (key === right){
+		SEdown = true;
+	}
+	if (NWdown = true && NEdown == true ){
+		Ndown = true;
+	}
+	if (NEdown = true && SEdown == true ){
+		Edown = true;
+	}
+	if (NWdown = true && SEdown == true ){
+		Wdown = true;
+	}
+	if (SWdown = true && SEdown == true ){
+		Sdown = true;
+	}
+}
+
+function inputUp(key){
+	Ndown = false;
+	Edown = false;
+	Wdown = false;
+	Sdown = false;
+	SEdown = false;
+	NEdown = false;
+	SWdown = false;
+	NWdown = false;
+}
+
+function playerAnim(){
+	if (Ndown == true) {
+	        	player.animations.play('N');
+	        }
+	        else if (Sdown == true)
+	        {
+	        	player.animations.play('S');
+	        }
+	        else if (Edown == true) {
+	        	player.animations.play('E');
+	        }
+	        else if (Wdown == true)
+	        {
+	        	player.animations.play('W');
+	        }
+	        else if (SEdown == true)
+	        {
+	        	player.animations.play('SE');
+	        }
+	        else if (SWdown == true)
+	        {
+	        	player.animations.play('SW');
+	        }
+	        else if (NWdown == true)
+	        {
+	        	player.animations.play('NW');
+
+	        }
+	        else if (NEdown == true)
+	        {
+	        	player.animations.play('NE');
+
+	        }
+	        else
+	        {
+	        	player.animations.stop();
+	        }
+}
+
 // camera Control (pretty clear what this does)
 function cameraControl() {
 	// Make the camera follow the player.
@@ -351,6 +448,9 @@ function rndNum( num ) {
 //function predatorAI(){}
 
 //function worldGenerator(){}
+
+//function stepsFadeout(){}
+
 
 //=========WORLD-MAKING-FUNCTIONS============//
 
