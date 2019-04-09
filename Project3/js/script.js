@@ -106,7 +106,7 @@ function preload() {
 	game.load.image( 'tile2', 'assets/images/floor.png' );
 
 	//-----------PLAYER-ANIMATIONS-----------//
-	game.load.spritesheet( 'player', 'assets/images/leftBunny222.png' );
+	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
 
 	// This adds the Phaser Isometric Plugin
 	game.plugins.add( new Phaser.Plugin.Isometric( game ) );
@@ -243,6 +243,7 @@ function update() {
 		} else {
 			player.body.velocity.x = 0;
 		}
+		 playerAnim();
 
 		// digging mechanic: if space is pressed then player is digging
 		//******should disable other inputs and play animation of player digging
@@ -334,7 +335,18 @@ function overlapCheck() {
 // Initiate Player, player is created and placed in the world
 function initPlayer() {
 	//set the player & place it in the obstacle group so it can collide and overlap check + be topologically sorted properly
-	player = game.add.isoSprite( 1350, 2500, 0, 'player', 0, obstacleGroup );
+	player = game.add.isoSprite( 1350, 2500, 0, 'playerAnim', 0, obstacleGroup );
+
+	// add the animations from the spritesheet
+	player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+	player.animations.add('SW', [8, 9, 10, 11, 12, 13, 14, 15], 10, true);
+	player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
+	player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
+	player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
+	player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
+	player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
+	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
+
 	player.anchor.setTo( anchorPoint );
 	//should be placed in the center of the world
 	player.x = 4500;
@@ -358,16 +370,16 @@ function inputDown(key){
 	if (key === right){
 		SEdown = true;
 	}
-	if (NWdown = true && NEdown == true ){
+	if (NWdown == true && NEdown == true ){
 		Ndown = true;
 	}
-	if (NEdown = true && SEdown == true ){
+	if (NEdown == true && SEdown == true ){
 		Edown = true;
 	}
-	if (NWdown = true && SEdown == true ){
+	if (NWdown == true && SWdown == true ){
 		Wdown = true;
 	}
-	if (SWdown = true && SEdown == true ){
+	if (SWdown == true && SEdown == true ){
 		Sdown = true;
 	}
 }
@@ -381,45 +393,37 @@ function inputUp(key){
 	NEdown = false;
 	SWdown = false;
 	NWdown = false;
+	console.log("all is false")
 }
 
 function playerAnim(){
-	if (Ndown == true) {
-	        	player.animations.play('N');
-	        }
-	        else if (Sdown == true)
-	        {
-	        	player.animations.play('S');
-	        }
-	        else if (Edown == true) {
-	        	player.animations.play('E');
-	        }
-	        else if (Wdown == true)
-	        {
-	        	player.animations.play('W');
-	        }
-	        else if (SEdown == true)
-	        {
-	        	player.animations.play('SE');
-	        }
-	        else if (SWdown == true)
-	        {
-	        	player.animations.play('SW');
-	        }
-	        else if (NWdown == true)
-	        {
-	        	player.animations.play('NW');
-
-	        }
-	        else if (NEdown == true)
-	        {
-	        	player.animations.play('NE');
-
-	        }
-	        else
-	        {
-	        	player.animations.stop();
-	        }
+	 if (SEdown == true){
+			console.log('SE')
+	        player.animations.play('SE');
+	} else if (SWdown == true){
+			console.log('SW')
+	       	player.animations.play('SW');
+	} else if (NWdown == true){
+			console.log('NW')
+	       	player.animations.play('NW');
+	} else if (NEdown == true){
+			console.log('NE')
+	       	player.animations.play('NE');
+	} else if (SWdown == true && SEdown == true ){
+			console.log('S')
+	        player.animations.play('S');
+ 	} else if (NEdown == true && SEdown == true ){
+			console.log('E')
+	        player.animations.play('E');
+	} else if (NWdown == true && SEdown == true ){
+			console.log('W')
+	        player.animations.play('W');
+	} else if (NWdown == true && NEdown == true ){
+			console.log('N')
+			player.animations.play('N');
+	} else{
+	       	player.animations.stop();
+	}
 }
 
 // camera Control (pretty clear what this does)
