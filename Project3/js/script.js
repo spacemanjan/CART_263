@@ -168,35 +168,7 @@ function create() {
 	snowEmitter();
 
 	//-----------KEYBOARD-------------//
-	// Set up our controls using the phaser cursor, which is an embeded controler
-	this.cursors = game.input.keyboard.createCursorKeys();
-	// Create a listener for the possible key presses
-	this.game.input.keyboard.addKeyCapture( [
-		Phaser.Keyboard.LEFT,
-		Phaser.Keyboard.RIGHT,
-		Phaser.Keyboard.UP,
-		Phaser.Keyboard.DOWN,
-		Phaser.Keyboard.SPACEBAR
-	] );
-	//KEYPRESS EVENTS *******Be more descriptive
-	//space has to be specified because it is not included in the phaser cursor library
-	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
-	//UP key press events used for animation and sprite control
-	up = game.input.keyboard.addKey( Phaser.Keyboard.UP );
-	up.onDown.add(inputDown,this);
-	up.onUp.add(inputUp,this);
-	//DOWN key 'ditto'
-	down = game.input.keyboard.addKey( Phaser.Keyboard.DOWN );
-	down.onDown.add(inputDown,this);
-	down.onUp.add(inputUp,this);
-	//LEFT key 'ditto'
-	left = game.input.keyboard.addKey( Phaser.Keyboard.LEFT );
-	left.onDown.add(inputDown,this);
-	left.onUp.add(inputUp,this);
-	//RIGHT key 'ditto'
-	right = game.input.keyboard.addKey( Phaser.Keyboard.RIGHT );
-	right.onDown.add(inputDown,this);
-	right.onUp.add(inputUp,this);
+	manageKeys();
 
 	//----------MUSIC------------//
 	//add audio track "music" set it to the soundTrack variable
@@ -226,24 +198,9 @@ function update() {
 
 		//Initiate camera controls (i.e. have camera follow player)
 		cameraControl();
-
 		//-----------PLAYER CONTROLS------------//
-		if ( this.cursors.up.isDown ) {
-			player.body.velocity.y = -speed;
-		} else if ( this.cursors.down.isDown ) {
-			player.body.velocity.y = speed;
-		} else {
-			player.body.velocity.y = 0;
-		}
-
-		if ( this.cursors.left.isDown ) {
-			player.body.velocity.x = -speed;
-		} else if ( this.cursors.right.isDown ) {
-			player.body.velocity.x = speed;
-		} else {
-			player.body.velocity.x = 0;
-		}
-		 playerAnim();
+		playerAnim();
+		movePlayer();
 
 		// digging mechanic: if space is pressed then player is digging
 		//******should disable other inputs and play animation of player digging
@@ -277,7 +234,40 @@ function update() {
 
 //=======VARIOUS-FUNCTIONS=========//
 // Here you will find the various functions called in our code
-// snowEmitter,initPlayer,overlapCheck,rndNum
+// snowEmitter,initPlayer,overlapCheck,rndNum,cameraControl,manageKeys
+
+// manageKeys establishes listeners and variables attributed to the useable keys
+function manageKeys(){
+	// Set up our controls using the phaser cursor, which is an embeded controler
+	this.cursors = game.input.keyboard.createCursorKeys();
+	// Create a listener for the possible key presses
+	this.game.input.keyboard.addKeyCapture( [
+		Phaser.Keyboard.LEFT,
+		Phaser.Keyboard.RIGHT,
+		Phaser.Keyboard.UP,
+		Phaser.Keyboard.DOWN,
+		Phaser.Keyboard.SPACEBAR
+	] );
+	//KEYPRESS EVENTS *******Be more descriptive
+	//space has to be specified because it is not included in the phaser cursor library
+	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
+	//UP key press events used for animation and sprite control
+	up = game.input.keyboard.addKey( Phaser.Keyboard.UP );
+	up.onDown.add(inputDown,this);
+	up.onUp.add(inputUp,this);
+	//DOWN key 'ditto'
+	down = game.input.keyboard.addKey( Phaser.Keyboard.DOWN );
+	down.onDown.add(inputDown,this);
+	down.onUp.add(inputUp,this);
+	//LEFT key 'ditto'
+	left = game.input.keyboard.addKey( Phaser.Keyboard.LEFT );
+	left.onDown.add(inputDown,this);
+	left.onUp.add(inputUp,this);
+	//RIGHT key 'ditto'
+	right = game.input.keyboard.addKey( Phaser.Keyboard.RIGHT );
+	right.onDown.add(inputDown,this);
+	right.onUp.add(inputUp,this);
+}
 
 // snowEmitter creates and defines the properties of the emitter
 function snowEmitter() {
@@ -332,100 +322,6 @@ function overlapCheck() {
 	// });
 }
 
-// Initiate Player, player is created and placed in the world
-function initPlayer() {
-	//set the player & place it in the obstacle group so it can collide and overlap check + be topologically sorted properly
-	player = game.add.isoSprite( 1350, 2500, 0, 'playerAnim', 0, obstacleGroup );
-
-	// add the animations from the spritesheet
-	player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
-	player.animations.add('SW', [8, 9, 10, 11, 12, 13, 14, 15], 10, true);
-	player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
-	player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
-	player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
-	player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
-	player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
-	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
-
-	player.anchor.setTo( anchorPoint );
-	//should be placed in the center of the world
-	player.x = 4500;
-	player.y = 700;
-	//enable physics on the player
-	game.physics.isoArcade.enable( player );
-	//collide with the floor of the world/don't fall into oblivion
-	player.body.collideWorldBounds = true;
-}
-
-function inputDown(key){
-	if (key === up){
-		NEdown = true;
-	}
-	if (key === down){
-		SWdown = true;
-	}
-	if (key === left){
-		NWdown = true;
-	}
-	if (key === right){
-		SEdown = true;
-	}
-	if (NWdown == true && NEdown == true ){
-		Ndown = true;
-	}
-	if (NEdown == true && SEdown == true ){
-		Edown = true;
-	}
-	if (NWdown == true && SWdown == true ){
-		Wdown = true;
-	}
-	if (SWdown == true && SEdown == true ){
-		Sdown = true;
-	}
-}
-
-function inputUp(key){
-	Ndown = false;
-	Edown = false;
-	Wdown = false;
-	Sdown = false;
-	SEdown = false;
-	NEdown = false;
-	SWdown = false;
-	NWdown = false;
-	console.log("all is false")
-}
-
-function playerAnim(){
-	 if (SEdown == true){
-			console.log('SE')
-	        player.animations.play('SE');
-	} else if (SWdown == true){
-			console.log('SW')
-	       	player.animations.play('SW');
-	} else if (NWdown == true){
-			console.log('NW')
-	       	player.animations.play('NW');
-	} else if (NEdown == true){
-			console.log('NE')
-	       	player.animations.play('NE');
-	} else if (SWdown == true && SEdown == true ){
-			console.log('S')
-	        player.animations.play('S');
- 	} else if (NEdown == true && SEdown == true ){
-			console.log('E')
-	        player.animations.play('E');
-	} else if (NWdown == true && SEdown == true ){
-			console.log('W')
-	        player.animations.play('W');
-	} else if (NWdown == true && NEdown == true ){
-			console.log('N')
-			player.animations.play('N');
-	} else{
-	       	player.animations.stop();
-	}
-}
-
 // camera Control (pretty clear what this does)
 function cameraControl() {
 	// Make the camera follow the player.
@@ -455,6 +351,148 @@ function rndNum( num ) {
 
 //function stepsFadeout(){}
 
+//========PLAYER-FUNCTIONS=========//
+//*****COMMENTS NEEDED HERE
+// Initiate Player, player is created and placed in the world,manages his directional animations
+function initPlayer() {
+	//set the player & place it in the obstacle group so it can collide and overlap check + be topologically sorted properly
+	player = game.add.isoSprite( 1350, 2500, 0, 'playerAnim', 0, obstacleGroup );
+
+	// add the animations from the spritesheet
+	player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+	player.animations.add('SW', [8, 9, 10, 11, 12, 13, 14, 15], 10, true);
+	player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
+	player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
+	player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
+	player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
+	player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
+	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
+
+	player.anchor.setTo( anchorPoint );
+	//should be placed in the center of the world
+	player.x = 4500;
+	player.y = 700;
+	//enable physics on the player
+	game.physics.isoArcade.enable( player );
+	//collide with the floor of the world/don't fall into oblivion
+	player.body.collideWorldBounds = true;
+}
+
+function movePlayer(){
+	if (Ndown == true) {
+		   player.body.velocity.y = -speed;
+		   player.body.velocity.x = -speed;
+	   }
+	   else if (Sdown == true)
+	   {
+		   player.body.velocity.y = speed;
+		   player.body.velocity.x = speed;
+	   }
+	   else if (Edown == true) {
+		   player.body.velocity.x = speed;
+		   player.body.velocity.y = -speed;
+	   }
+	   else if (Wdown == true)
+	   {
+		   player.body.velocity.x = -speed;
+		   player.body.velocity.y = speed;
+	   }
+	   else if (SEdown == true)
+	   {
+		   player.body.velocity.x = speed;
+		   player.body.velocity.y = 0;
+	   }
+	   else if (SWdown == true)
+	   {
+		   player.body.velocity.y = speed;
+		   player.body.velocity.x = 0;
+	   }
+	   else if (NWdown == true)
+	   {
+		   player.body.velocity.x = -speed;
+		   player.body.velocity.y = 0;
+
+	   }
+	   else if (NEdown == true)
+	   {
+		   player.body.velocity.y = -speed;
+		   player.body.velocity.x = 0;
+
+	   }
+	   else
+	   {
+		   player.body.velocity.x = 0;
+		   player.body.velocity.y = 0;
+	   }
+}
+
+function inputDown(key){
+	if (key === up){
+		NEdown = true;
+	}
+	if (key === down){
+		SWdown = true;
+	}
+	if (key === left){
+		NWdown = true;
+	}
+	if (key === right){
+		SEdown = true;
+	}
+	if (NWdown == true && NEdown == true ){
+		NEdown = false;
+		NWdown = false;
+		Ndown = true;
+	}
+	if (NEdown == true && SEdown == true ){
+		NEdown = false;
+		SEdown = false;
+		Edown = true;
+	}
+	if (NWdown == true && SWdown == true ){
+		NWdown = false;
+		SWdown = false;
+		Wdown = true;
+	}
+	if (SWdown == true && SEdown == true ){
+		SWdown = false;
+		SEdown = false;
+		Sdown = true;
+	}
+}
+
+function inputUp(key){
+	Ndown = false;
+	Edown = false;
+	Wdown = false;
+	Sdown = false;
+	SEdown = false;
+	NEdown = false;
+	SWdown = false;
+	NWdown = false;
+}
+
+function playerAnim(){
+	 if (SEdown == true){
+	        player.animations.play('SE');
+	} else if (SWdown == true){
+	       	player.animations.play('SW');
+	} else if (NWdown == true){
+	       	player.animations.play('NW');
+	} else if (NEdown == true){
+	       	player.animations.play('NE');
+	} else if (Sdown == true ){
+	        player.animations.play('S');
+ 	} else if (Edown == true ){
+	        player.animations.play('E');
+	} else if (Wdown == true){
+	        player.animations.play('W');
+	} else if (Ndown == true ){
+			player.animations.play('N');
+	} else{
+	       	player.animations.stop();
+	}
+}
 
 //=========WORLD-MAKING-FUNCTIONS============//
 
