@@ -178,6 +178,7 @@ function create() {
 		Phaser.Keyboard.DOWN,
 		Phaser.Keyboard.SPACEBAR
 	] );
+
 	manageKeys();
 
 	//----------MUSIC------------//
@@ -213,15 +214,6 @@ function update() {
 		movePlayer();
 
 		// digging mechanic: if space is pressed then player is digging
-		//******should disable other inputs and play animation of player digging
-		//******IF GAME RUNS TOO LONG THIS FUCKS THE GAME UP LOOK INTO IT
-		space.onDown.add( function() {
-			digging = true;
-			//digging can't be true forever so set digging to false after 20 milliseconds with time event
-			game.time.events.add( Phaser.Timer.SECOND * 0.2, function() {
-				digging = false;
-			}, this );
-		}, this );
 
 		//--------COLLISION-&-SORTING-----------//
 		// This is isometric plugin stuff
@@ -249,8 +241,6 @@ function update() {
 // manageKeys establishes listeners and variables attributed to the useable keys
 function manageKeys(){
 	//KEYPRESS EVENTS *******Be more descriptive
-	//space has to be specified because it is not included in the phaser cursor library
-	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
 	//UP key press events used for animation and sprite control
 	up = game.input.keyboard.addKey( Phaser.Keyboard.UP );
 	up.onDown.add(inputDown,this);
@@ -267,6 +257,10 @@ function manageKeys(){
 	right = game.input.keyboard.addKey( Phaser.Keyboard.RIGHT );
 	right.onDown.add(inputDown,this);
 	right.onUp.add(inputUp,this);
+	//SPACE key is an action key, it controls animation and also affects other functions
+	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
+	space.onDown.add(inputDown,this);
+	space.onUp.add(inputUp,this);
 }
 
 // snowEmitter creates and defines the properties of the emitter
@@ -379,7 +373,12 @@ function initPlayer() {
 }
 
 function movePlayer(){
-	if (Ndown == true) {
+	if (digging == true ) {
+		player.body.velocity.x = 0;
+		player.body.velocity.y = 0;
+	}
+	else if (digging == false){
+		if (Ndown == true) {
 		   player.body.velocity.y = -speed;
 		   player.body.velocity.x = -speed;
 	   }
@@ -424,9 +423,19 @@ function movePlayer(){
 		   player.body.velocity.x = 0;
 		   player.body.velocity.y = 0;
 	   }
+   }
 }
 
 function inputDown(key){
+	// digging mechanic: if space is pressed then player is digging
+	// *****Must add animation for digging
+	if (key === space){
+		digging = true;
+		//PHASER TIMER EXAMPLE TO BE USED LATER
+		// game.time.events.add( Phaser.Timer.SECOND * 0.2, function() {
+		// 	digging = false;
+		// }, this );
+	}
 	if (key === up){
 		NEdown = true;
 	}
@@ -470,6 +479,9 @@ function inputUp(key){
 	NEdown = false;
 	SWdown = false;
 	NWdown = false;
+	if( key === space){
+	digging = false;
+	}
 }
 
 function playerAnim(){
