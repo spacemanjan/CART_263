@@ -168,6 +168,16 @@ function create() {
 	snowEmitter();
 
 	//-----------KEYBOARD-------------//
+	// Set up our controls using the phaser cursor, which is an embeded controler
+	this.cursors = game.input.keyboard.createCursorKeys();
+	// Create a listener for the possible key presses
+	this.game.input.keyboard.addKeyCapture( [
+		Phaser.Keyboard.LEFT,
+		Phaser.Keyboard.RIGHT,
+		Phaser.Keyboard.UP,
+		Phaser.Keyboard.DOWN,
+		Phaser.Keyboard.SPACEBAR
+	] );
 	manageKeys();
 
 	//----------MUSIC------------//
@@ -238,16 +248,6 @@ function update() {
 
 // manageKeys establishes listeners and variables attributed to the useable keys
 function manageKeys(){
-	// Set up our controls using the phaser cursor, which is an embeded controler
-	this.cursors = game.input.keyboard.createCursorKeys();
-	// Create a listener for the possible key presses
-	this.game.input.keyboard.addKeyCapture( [
-		Phaser.Keyboard.LEFT,
-		Phaser.Keyboard.RIGHT,
-		Phaser.Keyboard.UP,
-		Phaser.Keyboard.DOWN,
-		Phaser.Keyboard.SPACEBAR
-	] );
 	//KEYPRESS EVENTS *******Be more descriptive
 	//space has to be specified because it is not included in the phaser cursor library
 	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
