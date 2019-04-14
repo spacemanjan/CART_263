@@ -17,6 +17,8 @@ var emitter;
 var title;
 var titleButton;
 var player;
+var fullHungerBar;
+var emptyHungerBar;
 
 //=========KEYBOARD=======//
 var up;
@@ -53,6 +55,7 @@ var isoGroup;
 var obstacleGroup;
 var eventGroup;
 var foodGroup;
+var uiGroup;
 
 //========CONTROLS=======//
 //Variables used for controlling the player character
@@ -87,6 +90,14 @@ var speed = 100;
 //Is it snowing?
 var snowing = true;
 
+//=======HUNGER-CONSTANTS=========//
+//Hunger meter
+var hungerMeter = 200;
+//Hunger rate how much you loose per 30 seconds
+var hungerRate = 10;
+//How much food replenishes
+var nutrition = 50;
+
 //==========GAME============//
 //Initiate Game Object
 //declare width,height & functions -- this is our main Object
@@ -117,6 +128,8 @@ function preload() {
 	game.load.image( 'tile', 'assets/images/snowTile.png' );
 	game.load.image( 'tile2', 'assets/images/floor.png' );
 	game.load.image( 'indtile', 'assets/images/tile.png');
+	game.load.image( 'fullStomach', 'assets/images/goodHunger.png' );
+	game.load.image( 'starving', 'assets/images/badHunger.png' );
 
 	//-----------PLAYER-ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -155,6 +168,8 @@ function create() {
 	eventGroup = game.add.group();
 	//OBSTACLEGROUP is...
 	obstacleGroup = game.add.group();
+	//UIGROUP is...
+	uiGroup = game.add.group();
 
 	//------TITLESCREEN-IN-CREATE------//
 	// "If game hasn't started yet then display the titleScreen sprite"
@@ -211,6 +226,8 @@ function create() {
 	soundTrack.loop = true;
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
 	setTimeout(function(){ soundTrack.play(); }, 500);
+
+	hunger();
 }
 
 //========UPDATE()========//
@@ -322,6 +339,7 @@ function overlapCheck() {
 			};
 		} );
 	} );
+	//BORDER WRAP RIGHT HERE
 	borderGroup.forEach(function(tile){
 		game.physics.isoArcade.overlap(tile, player ,function(){
 			distanceSignal.dispatch();
@@ -329,19 +347,6 @@ function overlapCheck() {
 			player.body.y = 1900;
 	});
 });
-	//THIS WAS USED TO MAKE THE PAW PRINTS IN THE SNOW
-	// isoGroup.forEach(function(tile){
-	// 	game.physics.isoArcade.overlap(tile, player ,function(freshTile,player){
-	// 					// newGround = game.add.isoSprite( holeTile.world.x, holeTile.world.y, 0, 'dug', 0, foodGroup );
-	// 					// newGround.anchor.setTo( 0.5, 0);
-	// 					// console.log(holeTile.world.x, holeTile.world.y, newGround.x, newGround.y);
-	// 					freshTile.loadTexture('step');
-	// 				// 	if(digging == true){
-	// 				// 	holeTile.destroy();
-	// 				// 	digging = false;
-	// 				// };
-	// 		});
-	// });
 }
 
 // camera Control (pretty clear what this does)
@@ -358,6 +363,7 @@ function rndNum( num ) {
 	return Math.floor( Math.random() * num );
 }
 
+// newTiles is the function responsible for changing the biome when you wrap
 function newTiles(){
 	isoGroup.forEach(function(tile){
 		var rnd = rndNum( 2 );
@@ -370,17 +376,43 @@ function newTiles(){
 }
 
 //****************FUNCTIONS TBA***********************//
-//function music(){}
 
-//function hunger(){}
+function hunger(){
+	fullHungerBar = game.add.sprite(730,20,'fullStomach', uiGroup );
+	fullHungerBar.anchor.setTo( anchorPoint, 0 );
+	emptyHungerBar = game.add.sprite(730,20,'starving', uiGroup );
+	emptyHungerBar.anchor.setTo( anchorPoint, 0 );
+    fullHungerBar.fixedToCamera = true;
+	fullHungerBar.alpha = 1
+	emptyHungerBar.alpha = 0
+	emptyHungerBar.fixedToCamera = true;
+	//Every 10 seconds change the alpha and update hungerMeter
+	game.time.events.loop(Phaser.Timer.SECOND, starveOrEat, this);
+}
 
-//function dayNight(){}
+function starveOrEat(){
+	//***COULD BE IMPROVE BUT WORKS
+	if (hungerMeter >= 0){
+		console.log(hungerMeter);
+		fullHungerBar.alpha -= (hungerRate/200)
+		emptyHungerBar.alpha -= (-hungerRate/200);
+		hungerMeter -= hungerRate
+	} else {
+		console.log("you are dead")
+	}
+}
+
+//function endingScene(){}
+
+//function food(){}
+
+//function steps(){}
 
 //function narrator(){}
 
 //function predatorAI(){}
 
-//function stepsFadeout(){}
+
 
 //========PLAYER-FUNCTIONS=========//
 //*****COMMENTS NEEDED HERE
@@ -465,6 +497,7 @@ function inputDown(key){
 	// *****Must add animation for digging
 	if (key === space){
 		digging = true;
+		zoom -= 0.3
 		//PHASER TIMER EXAMPLE TO BE USED LATER
 		// game.time.events.add( Phaser.Timer.SECOND * 0.2, function() {
 		// 	digging = false;
@@ -541,7 +574,6 @@ function playerAnim(){
 }
 
 //=========WORLD-MAKING-FUNCTIONS============//
-
 // In this section is located all the functions called in Create() which make the isometric landscape
 // & generates the objects, player, food, water ect...
 // ***TILES ARE STACKING ONTO EACH OTHER FIX DIS?
