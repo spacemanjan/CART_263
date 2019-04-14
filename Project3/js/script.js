@@ -29,10 +29,14 @@ var space;
 var soundTrack;
 
 //=======TILES==========//
+var centerTile;
 var tile;
 var newTile;
 var dig;
 var newGround;
+
+//=======SCROLLING=====//
+var distance;
 
 //======OBSTACLES=====//
 var rock;
@@ -40,6 +44,7 @@ var water;
 
 //========GROUPS========//
 //The different groups which hold different objects and ties them through common properties
+var centerGroup;
 var isoGroup;
 var obstacleGroup;
 var eventGroup;
@@ -53,7 +58,7 @@ var Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, 
 //The constant variables used in game can be editted here
 
 //Camera scale controller
-var zoom = 1;
+var zoom = 1.15;
 
 //WorldSize controls the Isometric arrays used for generating the game world
 //example: for ( var i = 0; i < worldSize; i += xxx );
@@ -70,7 +75,7 @@ var digging = false;
 var anchorPoint = 0.5
 
 //Player movement speed
-var speed = 100;
+var speed = 400;
 
 //Is it snowing?
 var snowing = true;
@@ -112,7 +117,8 @@ function preload() {
 	game.plugins.add( new Phaser.Plugin.Isometric( game ) );
 	// In order to have the camera move, we need to set our worldBounds
 	// setBounds(camera x, camera y, worldbound x, worldbound y)
-	game.world.setBounds( 0, 0, 9000, 9000 );
+	// this ends up being a 60 by 60 tile map
+	game.world.setBounds( 0, 0, 6080, 3040);
 	// Start the IsoArcade physics system.
 	game.physics.startSystem( Phaser.Plugin.Isometric.ISOARCADE );
 	//sets the point of origin for the first tile 0 = far left/top 1 = far right/bottom
@@ -131,6 +137,8 @@ function create() {
 	//The order we declare these groups is important as it sets their priority in relation to each other
 	//ISOGROUP is...
 	isoGroup = game.add.group();
+	//CENTERGROUP is...
+	centerGroup = game.add.group();
 	//FOODGROUP is...
 	foodGroup = game.add.group();
 	//EVENTGROUP is...
@@ -209,12 +217,12 @@ function update() {
 
 		//Initiate camera controls (i.e. have camera follow player)
 		cameraControl();
+		//-----------INFINITE-WALK----------------//
+		distanceCheck();
+		distanceAction();
 		//-----------PLAYER CONTROLS------------//
 		playerAnim();
 		movePlayer();
-
-		// digging mechanic: if space is pressed then player is digging
-
 		//--------COLLISION-&-SORTING-----------//
 		// This is isometric plugin stuff
 		// here we set the collision detection for the obstacleGroup & eventGroup
@@ -231,7 +239,8 @@ function update() {
 
 	// console.log area
 	// this area is called wether or not start is true
-	// console.log( digging );
+	console.log(distance);
+
 }
 
 //=======VARIOUS-FUNCTIONS=========//
@@ -330,6 +339,17 @@ function rndNum( num ) {
 	return Math.floor( Math.random() * num );
 }
 
+function distanceCheck(){
+	distance = Phaser.Math.distance(player.x, player.y, centerTile.x, centerTile.y);
+}
+
+function distanceAction(){
+	if (distance >= 888){
+		player.body.x = 1368;
+		player.body.y = 1368;
+ 	}
+}
+
 //****************FUNCTIONS TBA***********************//
 //function music(){}
 
@@ -350,7 +370,7 @@ function rndNum( num ) {
 // Initiate Player, player is created and placed in the world,manages his directional animations
 function initPlayer() {
 	//set the player & place it in the obstacle group so it can collide and overlap check + be topologically sorted properly
-	player = game.add.isoSprite( 1350, 2500, 0, 'playerAnim', 0, obstacleGroup );
+	player = game.add.isoSprite( 1300, 1300, 0, 'playerAnim', 0, obstacleGroup );
 
 	// add the animations from the spritesheet
 	player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
@@ -431,6 +451,7 @@ function inputDown(key){
 	// *****Must add animation for digging
 	if (key === space){
 		digging = true;
+		zoom -= 0.5;
 		//PHASER TIMER EXAMPLE TO BE USED LATER
 		// game.time.events.add( Phaser.Timer.SECOND * 0.2, function() {
 		// 	digging = false;
@@ -510,6 +531,7 @@ function playerAnim(){
 
 // In this section is located all the functions called in Create() which make the isometric landscape
 // & generates the objects, player, food, water ect...
+// ***TILES ARE STACKING ONTO EACH OTHER FIX DIS?
 function spawnTiles() {
 	// THIS IS THE TEMPLATE USED FOR PLACING EVERYTHING ELSE IN THE GAMEWORLD
 	// The basic function is this: create a loop for the X and then a loop for Y creating a isometric grid
@@ -517,6 +539,13 @@ function spawnTiles() {
 	//so in this loop we're adding a tile every 158px
 	for ( var i = 0; i < worldSize; i += 152 ) {
 		for ( var j = 0; j < worldSize; j += 152 ) {
+			// Create center tile this is the invisible tile which tracks our distance from it
+			if (i == 1520 && j == 1520){
+				centerTile = game.add.isoSprite(i,j,0, 'sds', 0, centerGroup);
+				centerTile.anchor.setTo( anchorPoint, 0 );
+				game.physics.isoArcade.enable( centerTile );
+				centerTile.body.collideWorldBounds = true;
+			}
 			// Create a tile using the new game.add.isoSprite factory method at the specified position.
 			var rnd = rndNum( 2 );
 			if ( rnd == 0 ) {
