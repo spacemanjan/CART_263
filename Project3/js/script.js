@@ -19,6 +19,11 @@ var titleButton;
 var player;
 var fullHungerBar;
 var emptyHungerBar;
+var chanceFood = false;
+var food;
+//Player movement speed
+var speed;
+
 
 //=========KEYBOARD=======//
 var up;
@@ -84,19 +89,21 @@ var digging = false;
 //0.5 means center of image
 var anchorPoint = 0.5
 
-//Player movement speed
-var speed = 100;
+//Player faster speed
+var fasterSpeed = 150;
 
 //Is it snowing?
 var snowing = true;
 
 //=======HUNGER-CONSTANTS=========//
 //Hunger meter
-var hungerMeter = 200;
+var hungerMeter
 //Hunger rate how much you loose per 30 seconds
 var hungerRate = 10;
+//Hungermax
+var hungerMax = 200;
 //How much food replenishes
-var nutrition = 50;
+var nutrition = 60;
 
 //==========GAME============//
 //Initiate Game Object
@@ -121,7 +128,6 @@ function preload() {
 	game.load.image( 'dig', 'assets/images/dig.png' );
 	game.load.image( 'water', 'assets/images/water.png' );
 	game.load.image( 'rock', 'assets/images/rocks.png' );
-	game.load.image( 'carrot', 'assets/images/food.png' );
 	game.load.image( 'dug', 'assets/images/dug.png' );
 	game.load.image( 'snow', 'assets/images/snow.png' );
 	game.load.image( 'step', 'assets/images/steps.png' );
@@ -131,9 +137,9 @@ function preload() {
 	game.load.image( 'fullStomach', 'assets/images/goodHunger.png' );
 	game.load.image( 'starving', 'assets/images/badHunger.png' );
 
-	//-----------PLAYER-ANIMATIONS-----------//
+	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
-
+	game.load.spritesheet( 'foodAnim', 'assets/images/foodSpriteSheet.png', 105, 352 );
 	// This adds the Phaser Isometric Plugin
 	game.plugins.add( new Phaser.Plugin.Isometric( game ) );
 	// In order to have the camera move, we need to set our worldBounds
@@ -227,7 +233,7 @@ function create() {
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
 	setTimeout(function(){ soundTrack.play(); }, 500);
 
-	hunger();
+	initHunger();
 }
 
 //========UPDATE()========//
@@ -246,7 +252,8 @@ function update() {
 		}, this );
 		// "if game has begun then..."
 	} else {
-
+		//-----------FOOD--------------------------//
+		foodHungerManager();
 		//Initiate camera controls (i.e. have camera follow player)
 		cameraControl();
 		//-----------PLAYER CONTROLS------------//
@@ -327,26 +334,29 @@ function snowEmitter() {
 
 // overlapCheck is an event function which is checking if player is over the dig tile
 function overlapCheck() {
-	//"for each tile in the event group preform the following..."
-	eventGroup.forEach( function( dig ) {
-		//"check for overlap between the tile passed in the function above & the player & if they overlap perform..."
-		game.physics.isoArcade.overlap( dig, player, function( holeTile, player ) {
-			// if player is digging for food
-			if ( digging == true ) {
-				// replace the texture of the tile with a new texture
-				//***have a food item pop up above the players head + fill their food meter (with appropriate level of nutrition)
-				holeTile.loadTexture( 'dug' );
-			};
+		//"for each tile in the event group preform the following..."
+		eventGroup.forEach( function( dig ) {
+			//"check for overlap between the tile passed in the function above & the player & if they overlap perform..."
+			game.physics.isoArcade.overlap( dig, player, function( holeTile, player ) {
+				// if player is digging for food
+				if (holeTile.key == 'dig'){
+					if ( digging == true ) {
+						// replace the texture of the tile with a new texture
+						//***have a food item pop up above the players head + fill their food meter (with appropriate level of nutrition)
+						holeTile.loadTexture( 'dug' );
+						chanceFood = true;
+					};
+				}
+			} );
 		} );
-	} );
-	//BORDER WRAP RIGHT HERE
-	borderGroup.forEach(function(tile){
-		game.physics.isoArcade.overlap(tile, player ,function(){
-			distanceSignal.dispatch();
-			player.body.x = 1900;
-			player.body.y = 1900;
+		//BORDER WRAP RIGHT HERE
+		borderGroup.forEach(function(tile){
+			game.physics.isoArcade.overlap(tile, player ,function(){
+				distanceSignal.dispatch();
+				player.body.x = 1900;
+				player.body.y = 1900;
+		});
 	});
-});
 }
 
 // camera Control (pretty clear what this does)
@@ -377,34 +387,61 @@ function newTiles(){
 
 //****************FUNCTIONS TBA***********************//
 
-function hunger(){
+function initHunger(){
+	hungerMeter = 200;
 	fullHungerBar = game.add.sprite(730,20,'fullStomach', uiGroup );
 	fullHungerBar.anchor.setTo( anchorPoint, 0 );
 	emptyHungerBar = game.add.sprite(730,20,'starving', uiGroup );
 	emptyHungerBar.anchor.setTo( anchorPoint, 0 );
     fullHungerBar.fixedToCamera = true;
-	fullHungerBar.alpha = 1
-	emptyHungerBar.alpha = 0
+	emptyHungerBar.alpha = 0;
 	emptyHungerBar.fixedToCamera = true;
 	//Every 10 seconds change the alpha and update hungerMeter
-	game.time.events.loop(Phaser.Timer.SECOND, starveOrEat, this);
+	game.time.events.loop(Phaser.Timer.SECOND*10, function(){
+		if (hungerMeter > 0) {
+			hungerMeter -= hungerRate
+			fullHungerBar.alpha = hungerMeter/200
+			emptyHungerBar.alpha = (1 - (hungerMeter/200));
+		} else {
+			emptyHungerBar.alpha = 1;
+			console.log('yea youre dead')
+		}
+	}, this);
 }
 
-function starveOrEat(){
-	//***COULD BE IMPROVE BUT WORKS
-	if (hungerMeter >= 0){
-		console.log(hungerMeter);
-		fullHungerBar.alpha -= (hungerRate/200)
-		emptyHungerBar.alpha -= (-hungerRate/200);
-		hungerMeter -= hungerRate
-	} else {
-		console.log("you are dead")
+function foodHungerManager(){
+	if (chanceFood == true){
+		var rnd = rndNum(100)
+		if (rnd < 25){
+			//You get nothing, snow puff animation
+		} else if (rnd >= 25 && rnd < 50){
+			//You get an acorn, acorn animation, + 15 hungerMeter, delay starveOrEat in hunger function
+			hungerMeter += nutrition/4;
+		} else if (rnd >= 50 && rnd < 75){
+			//You get a potato, potato animation, + 30 hungerMeter, delay ''
+			hungerMeter += nutrition/2;
+		} else if (rnd >= 75 && rnd < 97){
+			//You get a Carrot, carrot animation, + 60 hungerMeter, delay ''
+			hungerMeter += nutrition;
+		} else if (rnd >= 97){
+			console.log("artifact get")
+		}
+		//Make sure HungerMeter is never over 200
+		if (hungerMeter > 200){
+			hungerMeter = 200;
+		}
+		fullHungerBar.alpha = hungerMeter/200
+		emptyHungerBar.alpha = (1 - (hungerMeter/200));
+		chanceFood = false;
 	}
+	//Increase player speed if hunger is between 180 & 200
+	if (hungerMeter > 180){
+		speed = fasterSpeed
+	} else {
+		speed = 100;
+	}
+	console.log(fullHungerBar.alpha, emptyHungerBar.alpha, hungerMeter);
 }
-
-//function endingScene(){}
-
-//function food(){}
 
 //function steps(){}
 
@@ -412,7 +449,7 @@ function starveOrEat(){
 
 //function predatorAI(){}
 
-
+//function endingScene(){}
 
 //========PLAYER-FUNCTIONS=========//
 //*****COMMENTS NEEDED HERE
@@ -497,11 +534,6 @@ function inputDown(key){
 	// *****Must add animation for digging
 	if (key === space){
 		digging = true;
-		zoom -= 0.3
-		//PHASER TIMER EXAMPLE TO BE USED LATER
-		// game.time.events.add( Phaser.Timer.SECOND * 0.2, function() {
-		// 	digging = false;
-		// }, this );
 	}
 	if (key === up){
 		NEdown = true;
