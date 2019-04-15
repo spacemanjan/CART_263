@@ -31,6 +31,7 @@ var left;
 var right;
 var down;
 var space;
+var shift;
 
 //==SOUNDTRACK==// taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
 var soundTrack;
@@ -65,6 +66,12 @@ var uiGroup;
 //========CONTROLS=======//
 //Variables used for controlling the player character
 var Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
+//Digging is used to check if the player has infact pressed space to dig, default is false
+var digging = false;
+//shiftDown tracks the up or down of the shift key
+var shiftDown = false;
+//hideCounter is the counter which tracks how many times the player has pressed shift
+var hideCounter = 0;
 
 //========CONSTANTS========//
 //The constant variables used in game can be editted here
@@ -81,9 +88,6 @@ var centerMap = 1900;
 
 //Start is used for the Title screen if false = display Title titleScreen, if true = give player control
 var start = false;
-
-//Digging is used to check if the player has infact pressed space to dig, default is false
-var digging = false;
 
 //the Typical achorPoint for everything
 //0.5 means center of image
@@ -207,6 +211,8 @@ function create() {
 	spawnRocks();
 	//snowEmitter creates the emitter of the snow particles
 	snowEmitter();
+	//initHunger creates the hungerMeter graphics & starts a looping timer event
+	initHunger();
 
 	//------------SIGNALS-------------//
 	distanceSignal.add(newTiles, this);
@@ -220,7 +226,8 @@ function create() {
 		Phaser.Keyboard.RIGHT,
 		Phaser.Keyboard.UP,
 		Phaser.Keyboard.DOWN,
-		Phaser.Keyboard.SPACEBAR
+		Phaser.Keyboard.SPACEBAR,
+		Phaser.Keyboard.SHIFT
 	] );
 
 	manageKeys();
@@ -232,8 +239,6 @@ function create() {
 	soundTrack.loop = true;
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
 	setTimeout(function(){ soundTrack.play(); }, 500);
-
-	initHunger();
 }
 
 //========UPDATE()========//
@@ -306,6 +311,10 @@ function manageKeys(){
 	space = game.input.keyboard.addKey( Phaser.Keyboard.SPACEBAR );
 	space.onDown.add(inputDown,this);
 	space.onUp.add(inputUp,this);
+	//SHIFT key is also an action key, it also controls animation and also affects other functions
+	shift = game.input.keyboard.addKey( Phaser.Keyboard.SHIFT );
+	shift.onDown.add(inputDown,this);
+	shift.onUp.add(inputUp,this);
 }
 
 // snowEmitter creates and defines the properties of the emitter
@@ -440,7 +449,6 @@ function foodHungerManager(){
 	} else {
 		speed = 100;
 	}
-	console.log(fullHungerBar.alpha, emptyHungerBar.alpha, hungerMeter);
 }
 
 //function steps(){}
@@ -479,8 +487,7 @@ function movePlayer(){
 	if (digging == true ) {
 		player.body.velocity.x = 0;
 		player.body.velocity.y = 0;
-	}
-	else if (digging == false){
+	} else if (digging == false){
 		if (Ndown == true) {
 		   player.body.velocity.y = -speed;
 		   player.body.velocity.x = -speed;
@@ -535,6 +542,13 @@ function inputDown(key){
 	if (key === space){
 		digging = true;
 	}
+	// shift adds 1 to the hideCounter
+	if (key === shift){
+		if (shiftDown == false){
+			hideCounter ++;
+		}
+		shiftDown = true;
+	}
 	if (key === up){
 		NEdown = true;
 	}
@@ -580,6 +594,9 @@ function inputUp(key){
 	NWdown = false;
 	if( key === space){
 	digging = false;
+	}
+	if ( key === shift){
+	shiftDown = false;
 	}
 }
 
