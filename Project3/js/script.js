@@ -414,7 +414,11 @@ function initHunger(){
 	//Every 10 seconds change the alpha and update hungerMeter
 	game.time.events.loop(Phaser.Timer.SECOND*10, function(){
 		if (hungerMeter > 0) {
-			hungerMeter -= hungerRate
+			if (hiding == true){
+				hungerMeter -= hungerRate*2
+			} else {
+				hungerMeter -= hungerRate
+			}
 			fullHungerBar.alpha = hungerMeter/200
 			emptyHungerBar.alpha = (1 - (hungerMeter/200));
 		} else {
@@ -462,7 +466,6 @@ function initObscure(){
 	obscureFilter.fixedToCamera = true;
 	obscureFilter.scale.setTo(0.4,0.4);
 	obscureFilter.alpha = 0;
-
 }
 
 //function steps(){}
