@@ -29,6 +29,14 @@ var playerHiding = false;
 var hidden = false;
 var obscureFilter;
 
+//=========MONSTER=======//
+var monster;
+var monsterSpeed = 200;
+var monsterDistance;
+var monsterRnd;
+var returningMonster = false;
+var chase = false;
+var blocked = false;
 
 //=========KEYBOARD=======//
 var up;
@@ -54,7 +62,7 @@ var newGround;
 
 //=======SCROLLING=====//
 var distanceSignal = new Phaser.Signal();
-var distance;
+
 
 //======OBSTACLES=====//
 var rock;
@@ -100,6 +108,9 @@ var start = false;
 //0.5 means center of image
 var anchorPoint = 0.5
 
+//Player regular speed
+var regularSpeed = 100;
+
 //Player faster speed
 var fasterSpeed = 150;
 
@@ -115,6 +126,8 @@ var hungerRate = 10;
 var hungerMax = 200;
 //How much food replenishes
 var nutrition = 60;
+//=========DEVELOPER=============//
+// var chaseCounter = 0;
 
 //==========GAME============//
 //Initiate Game Object
@@ -150,6 +163,7 @@ function preload() {
 	game.load.image( 'fullStomach', 'assets/images/goodHunger.png' );
 	game.load.image( 'starving', 'assets/images/badHunger.png' );
 	game.load.image( 'obscure', 'assets/images/hiddenFilter.png');
+	game.load.image( 'monsterTemp', 'assets/images/monster.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -216,6 +230,7 @@ function create() {
 	spawnDig();
 	//initPlayer creates the player
 	initPlayer();
+	//initFood creates the food gameObject & animations we'll be using
 	initFood();
 	//spawnWater creates the bodies of water located on the map
 	spawnWater();
@@ -227,7 +242,8 @@ function create() {
 	initHunger();
 	//initObscure sets a filter to be positioned precisely where we need it
 	initObscure();
-	//initFood creates the food gameObject & animations we'll be using
+	//initMonster creates the monster and its animations
+	initMonster();
 
 	//------------SIGNALS-------------//
 	distanceSignal.add(newTiles, this);
@@ -281,12 +297,15 @@ function update() {
 		//-----------PLAYER CONTROLS------------//
 		playerAnim();
 		actionPlayer();
+		//-----------MONSTER----------------------//
+		monsterAI();
 		//--------COLLISION-&-SORTING-----------//
 		// This is isometric plugin stuff
 		// here we set the collision detection for the obstacleGroup & eventGroup
 		// Topological sort is how the Iso plugin checks what should be in the infront of what
 		//****WHEN MAKING SPRITES DONT FORGET TO CHECK PINK LINES****
-		game.physics.isoArcade.collide( obstacleGroup );
+		game.physics.isoArcade.collide( monster, obstacleGroup, monsterSwitch);
+		game.physics.isoArcade.collide (obstacleGroup);
 		game.iso.topologicalSort( obstacleGroup );
 		game.physics.isoArcade.collide( eventGroup );
 		game.iso.topologicalSort( eventGroup );
@@ -480,7 +499,7 @@ function foodHungerManager(){
 	if (hungerMeter > 180){
 		speed = fasterSpeed
 	} else {
-		speed = 100;
+		speed = regularSpeed;
 	}
 }
 
@@ -518,12 +537,156 @@ function initFood(){
 	food.body.collideWorldBounds = true;
 	food.alpha = 0;
 }
+
 //function steps(){}
 
 //function narrator(){}
 
-//function predatorAI(){}
+function initMonster(){
+	monster = game.add.isoSprite( centerMap, centerMap, 0, 'monsterTemp', 0, obstacleGroup);
+	//monster animations will go here
+	game.time.events.loop(Phaser.Timer.SECOND, function(){
+		monsterRnd = rndNum(8)
+		blocked = false;
+	}, this);
+	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
+		returningMonster = false;
+	}, this);
 
+	monster.anchor.setTo( anchorPoint );
+	//enable physics on the monster
+	game.physics.isoArcade.enable( monster );
+	//collide with the floor of the world/don't fall into oblivion
+	monster.body.collideWorldBounds = true;
+}
+
+function monsterAI(){
+	monsterDistance = Phaser.Math.distance(player.body.x, player.body.y, monster.body.x, monster.body.y);
+	if (blocked == false){
+		if (returningMonster == false){
+			if (monsterDistance <= 700){
+				if (monsterRnd == 1) {
+				   monster.body.velocity.y = -monsterSpeed;
+				   monster.body.velocity.x = -monsterSpeed;
+			   } else if (monsterRnd == 2) {
+				   monster.body.velocity.y = monsterSpeed;
+				   monster.body.velocity.x = monsterSpeed;
+			   } else if (monsterRnd == 3) {
+				   monster.body.velocity.x = monsterSpeed;
+				   monster.body.velocity.y = -monsterSpeed;
+			   } else if (monsterRnd == 4) {
+				   monster.body.velocity.x = -monsterSpeed;
+				   monster.body.velocity.y = monsterSpeed;
+			   } else if (monsterRnd == 5) {
+				   monster.body.velocity.x = monsterSpeed;
+				   monster.body.velocity.y = 0;
+			   } else if (monsterRnd == 6) {
+				   monster.body.velocity.y = monsterSpeed;
+				   monster.body.velocity.x = 0;
+			   } else if (monsterRnd == 7) {
+				   monster.body.velocity.x = -monsterSpeed;
+				   monster.body.velocity.y = 0;
+			   } else if (monsterRnd == 8) {
+				   monster.body.velocity.y = -monsterSpeed;
+				   monster.body.velocity.x = 0;
+			   }
+		   } else {
+			  returningMonster = true;
+		   }
+	   } else {
+		   if (chase == false){
+			   console.log('monster returning near player')
+			   if (monster.body.x > player.body.x && monster.body.y > player.body.y){
+				   monster.body.velocity.x = -monsterSpeed;
+				   monster.body.velocity.y = -monsterSpeed;
+			   } else if (monster.body.x < player.body.x && monster.body.y < player.body.y){
+				   monster.body.velocity.x = monsterSpeed;
+				   monster.body.velocity.y = monsterSpeed;
+			   } else if (monster.body.x > player.body.x && monster.body.y < player.body.y){
+				   monster.body.velocity.x = -monsterSpeed;
+				   monster.body.velocity.y = monsterSpeed;
+			   } else if (monster.body.x < player.body.x && monster.body.y > player.body.y){
+				   monster.body.velocity.x = monsterSpeed;
+				   monster.body.velocity.y = -monsterSpeed;
+			   } else if (monster.body.x == player.body.x && monster.body.y > player.body.y){
+				   monster.body.velocity.x = 0;
+				   monster.body.velocity.y = -monsterSpeed;
+			   } else if (monster.body.x == player.body.x && monster.body.y < player.body.y){
+				   monster.body.velocity.x = 0;
+				   monster.body.velocity.y = monsterSpeed;
+			   } else if (monster.body.x > player.body.x && monster.body.y == player.body.y){
+				   monster.body.velocity.x = -monsterSpeed;
+				   monster.body.velocity.y = 0;
+			   } else if (monster.body.x < player.body.x && monster.body.y == player.body.y){
+				   monster.body.velocity.x = monsterSpeed;
+				   monster.body.velocity.y = 0;
+			   }
+		   }
+	   }
+	   if (chase == true){
+		   console.log("monster coming to kill player")
+		   if (monster.body.x > player.body.x && monster.body.y > player.body.y){
+			   monster.body.velocity.x = -monsterSpeed;
+			   monster.body.velocity.y = -monsterSpeed;
+		   } else if (monster.body.x < player.body.x && monster.body.y < player.body.y){
+			   monster.body.velocity.x = monsterSpeed;
+			   monster.body.velocity.y = monsterSpeed;
+		   } else if (monster.body.x > player.body.x && monster.body.y < player.body.y){
+			   monster.body.velocity.x = -monsterSpeed;
+			   monster.body.velocity.y = monsterSpeed;
+		   } else if (monster.body.x < player.body.x && monster.body.y > player.body.y){
+			   monster.body.velocity.x = monsterSpeed;
+			   monster.body.velocity.y = -monsterSpeed;
+		   } else if (monster.body.x == player.body.x && monster.body.y > player.body.y){
+			   monster.body.velocity.x = 0;
+			   monster.body.velocity.y = -monsterSpeed;
+		   } else if (monster.body.x == player.body.x && monster.body.y < player.body.y){
+			   monster.body.velocity.x = 0;
+			   monster.body.velocity.y = monsterSpeed;
+		   } else if (monster.body.x > player.body.x && monster.body.y == player.body.y){
+			   monster.body.velocity.x = -monsterSpeed;
+			   monster.body.velocity.y = 0;
+		   } else if (monster.body.x < player.body.x && monster.body.y == player.body.y){
+			   monster.body.velocity.x = monsterSpeed;
+			   monster.body.velocity.y = 0;
+		   }
+	   }
+   } else {
+	   console.log('monster blocked');
+	   if (monsterRnd == 1) {
+		  monster.body.velocity.y = -monsterSpeed;
+		  monster.body.velocity.x = -monsterSpeed;
+	  } else if (monsterRnd == 2) {
+		  monster.body.velocity.y = monsterSpeed;
+		  monster.body.velocity.x = monsterSpeed;
+	  } else if (monsterRnd == 3) {
+		  monster.body.velocity.x = monsterSpeed;
+		  monster.body.velocity.y = -monsterSpeed;
+	  } else if (monsterRnd == 4) {
+		  monster.body.velocity.x = -monsterSpeed;
+		  monster.body.velocity.y = monsterSpeed;
+	  } else if (monsterRnd == 5) {
+		  monster.body.velocity.x = monsterSpeed;
+		  monster.body.velocity.y = 0;
+	  } else if (monsterRnd == 6) {
+		  monster.body.velocity.y = monsterSpeed;
+		  monster.body.velocity.x = 0;
+	  } else if (monsterRnd == 7) {
+		  monster.body.velocity.x = -monsterSpeed;
+		  monster.body.velocity.y = 0;
+	  } else if (monsterRnd == 8) {
+		  monster.body.velocity.y = -monsterSpeed;
+		  monster.body.velocity.x = 0;
+	  }
+   }
+}
+
+function monsterSwitch(){
+	monsterRnd ++;
+	if (returningMonster == true || chase == true){
+		blocked = true;
+	}
+}
 //function endingScene(){}
 
 
