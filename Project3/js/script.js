@@ -35,7 +35,7 @@ var monsterSpeed = 200;
 var monsterDistance;
 var monsterRnd;
 var returningMonster = false;
-var chase = false;
+var chase = true;
 var blocked = false;
 
 //=========KEYBOARD=======//
@@ -77,6 +77,7 @@ var obstacleGroup;
 var eventGroup;
 var foodGroup;
 var uiGroup;
+var playerGroup;
 
 //========CONTROLS=======//
 //Variables used for controlling the player character
@@ -682,11 +683,13 @@ function monsterAI(){
 }
 
 function monsterSwitch(){
+	console.log('monster mash')
 	monsterRnd ++;
 	if (returningMonster == true || chase == true){
 		blocked = true;
 	}
 }
+
 //function endingScene(){}
 
 
@@ -877,10 +880,16 @@ function playerAnim(){
 				} else {
 					playerHiding = false;
 				}; }, this);
-	} else{
+	} else {
 	       	player.animations.stop();
 	}
+	if (monsterDistance < 30){
+		//add monster killing player animation here
+		player.kill();
+		chase = false;
+	}
 }
+
 
 //=========WORLD-MAKING-FUNCTIONS============//
 // In this section is located all the functions called in Create() which make the isometric landscape
