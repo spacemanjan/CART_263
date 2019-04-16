@@ -62,6 +62,8 @@ var borderTile;
 var tile;
 var newTile;
 var dig;
+var nonDig;
+var wrapRnd;
 var newGround;
 
 //=======SCROLLING=====//
@@ -71,6 +73,7 @@ var distanceSignal = new Phaser.Signal();
 //======OBSTACLES=====//
 var rock;
 var water;
+var nonTile;
 
 //========GROUPS========//
 //The different groups which hold different objects and ties them through common properties
@@ -115,10 +118,10 @@ var start = false;
 var anchorPoint = 0.5
 
 //Player regular speed
-var regularSpeed = 100;
+var regularSpeed = 300;
 
 //Player faster speed
-var fasterSpeed = 150;
+var fasterSpeed = 350;
 
 //Is it snowing?
 var snowing = true;
@@ -174,6 +177,7 @@ function preload() {
 	game.load.image( 'obscure', 'assets/images/hiddenFilter.png');
 	game.load.image( 'danger', 'assets/images/dangerFilter.png');
 	game.load.image( 'monsterTemp', 'assets/images/monster.png');
+	game.load.image( 'nothing', 'assets/images/nothing.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -237,15 +241,13 @@ function create() {
 	//spawnTiles creates the base layer of the world (i.e. the initial worldSize)
 	spawnTiles();
 	//spawnDig creates the food stashs located around the map
-	spawnDig();
+	// spawnDig();
 	//initPlayer creates the player
 	initPlayer();
 	//initFood creates the food gameObject & animations we'll be using
 	initFood();
-	//spawnWater creates the bodies of water located on the map
-	spawnWater();
-	//spawnRocks creates the bolders found around the map
-	spawnRocks();
+	//spawnBiomes creates the rocks and lakes
+	spawnBiome();
 	//snowEmitter creates the emitter of the snow particles
 	snowEmitter();
 	//initHunger creates the hungerMeter graphics & starts a looping timer event
@@ -431,13 +433,53 @@ function rndNum( num ) {
 
 // newTiles is the function responsible for changing the biome when you wrap
 function newTiles(){
-	isoGroup.forEach(function(tile){
-		var rnd = rndNum( 2 );
-			if ( rnd == 0 ) {
-				tile.loadTexture('tile');
+	obstacleGroup.forEach(function(tile){
+		wrapRnd = rndNum(40)
+		if ( wrapRnd == 1 ){
+			if (tile.body.enable == false){
+				tile.body.enable = true;
+				tile.loadTexture('rock');
 			} else {
-				tile.loadTexture('tile2');
+				tile.loadTexture('rock');
 			}
+		} else if (wrapRnd == 2){
+			if (tile.body.enable == false){
+				tile.body.enable = true;
+				tile.loadTexture('water');
+			} else {
+				tile.loadTexture('water');
+			}
+		} else {
+			//change monsterTemp to monsterAnim
+			if (tile.key == 'playerAnim' || tile.key == 'monsterTemp'){
+				console.log('dont fuck with me')
+			} else {
+				if (tile.body.enable == true){
+					tile.body.enable = false;
+					tile.loadTexture('nothing');
+				} else {
+					tile.loadTexture('nothing');
+				}
+			}
+		}
+	});
+	eventGroup.forEach(function(tile){
+		wrapRnd = rndNum(40)
+		if (wrapRnd == 1 || wrapRnd == 2 || wrapRnd == 3){
+			if (tile.body.enable == false){
+				tile.body.enable = true;
+				tile.loadTexture('dig');
+			} else {
+				tile.loadTexture('dig');
+			}
+		} else {
+			if (tile.body.enable == true){
+				tile.body.enable = false;
+				tile.loadTexture('nothing');
+			} else {
+				tile.loadTexture('nothing');
+			}
+		}
 	});
 }
 
@@ -558,6 +600,7 @@ function initFood(){
 //function steps(){}
 
 //function narrator(){}
+
 function monsterManager(){
 
 	if (keyCounter >= keysToMonster){
@@ -855,6 +898,7 @@ function inputDown(key){
 	} else {
 		if (key === space){
 			digging = true;
+			zoom -= 0.3;
 		}
 		// shift adds 1 to the hideCounter
 		if (key === shift){
@@ -1007,34 +1051,9 @@ function spawnTiles() {
 	}
 }
 
-function spawnDig() {
-	for ( var i = 0; i < worldSize; i += 38 ) {
-		for ( var j = 0; j < worldSize; j += 38 ) {
-			//randomly pick tiles to place so in this case 1:21 chance of being placed (i guess, honestly im no good at math)
-			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
-
-			} else {
-				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
-
-				} else {
-					var rnd = rndNum( 100 );
-					if ( rnd == 2 ) {
-						dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
-						dig.anchor.setTo( anchorPoint, 0 );
-						// newGround = game.add.isoSprite( i, j, 0, 'dug', 0, foodGroup );
-						// newGround.anchor.setTo( 0.5, 0);
-						game.physics.isoArcade.enable( dig );
-						dig.body.collideWorldBounds = true;
-					}
-				}
-			}
-		}
-	}
-}
-
-function spawnWater() {
-	for ( var i = 0; i < worldSize; i += 38 ) {
-		for ( var j = 0; j < worldSize; j += 38 ) {
+function spawnBiome(){
+	for ( var i = 0; i < worldSize; i += 152 ) {
+		for ( var j = 0; j < worldSize; j += 152 ) {
 			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
 
 			} else {
@@ -1048,30 +1067,30 @@ function spawnWater() {
 						game.physics.isoArcade.enable( water );
 						water.body.collideWorldBounds = true;
 						water.body.immovable = true;
-					}
-				}
-			}
-		}
-	}
-}
-
-function spawnRocks() {
-	for ( var i = 0; i < worldSize; i += 38 ) {
-		for ( var j = 0; j < worldSize; j += 38 ) {
-			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
-
-			} else {
-				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
-
-				} else {
-					//randomly pick tiles to place so in this case 1:21 chance of being placed (i guess, honestly im no good at math)
-					var rnd = rndNum( 40 );
-					if ( rnd == 0 ) {
+					} else if (rnd == 2){
 						rock = game.add.isoSprite( i, j, 0, 'rock', 0, obstacleGroup );
 						rock.anchor.setTo( anchorPoint, 0 );
 						game.physics.isoArcade.enable( rock );
 						rock.body.collideWorldBounds = true;
 						rock.body.immovable = true;
+					} else if (rnd == 3){
+						dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
+						dig.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( dig );
+						dig.body.collideWorldBounds = true;
+					} else if (rnd <= 19){
+						nonDig = game.add.isoSprite( i, j, 0, 'nothing', 0, eventGroup );
+						nonDig.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( nonDig );
+						nonDig.body.collideWorldBounds = true;
+						nonDig.body.enable = false;
+					} else if (rnd >= 20){
+						nonTile = game.add.isoSprite(i, j, 0, 'nothing', 0, obstacleGroup );
+						nonTile.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( nonTile );
+						nonTile.body.collideWorldBounds = true;
+						nonTile.body.enable = false;
+						nonTile.body.immovable = true;
 					}
 				}
 			}
