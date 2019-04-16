@@ -13,139 +13,213 @@ The important part is to have fun.
 ******************/
 //========VARIABLES========//
 //The MISC variables used in the game
-var emitter;
-var title;
-var titleButton;
-var player;
-var fullHungerBar;
-var emptyHungerBar;
-var chanceFood = false;
-var food;
-var justAte = false;
+let emitter;
+let title;
+let titleButton;
+let player;
+let fullHungerBar;
+let emptyHungerBar;
+let chanceFood = false;
+let food;
+let justAte = false;
 
 //Player movement speed
-var speed;
-var playerHiding = false;
-var hidden = false;
-var obscureFilter;
-var dangerFilter;
+let speed;
+let playerHiding = false;
+let hidden = false;
+let obscureFilter;
+let dangerFilter;
 
 //=========MONSTER=======//
-var monster;
-var monsterSpeed = 200;
-var monsterDistance;
-var monsterRnd;
-var returningMonster = false;
-var chase = true;
-var blocked = false;
-var monsterSpawned = false;
-var monsterComing = false;
-var monsterPlaced = false;
+let monster;
+let monsterSpeed = 200;
+let monsterDistance;
+let monsterRnd;
+let returningMonster = false;
+let chase = true;
+let blocked = false;
+let monsterSpawned = false;
+let monsterComing = false;
+let monsterPlaced = false;
+
 
 //=========KEYBOARD=======//
-var up;
-var left;
-var right;
-var down;
-var space;
-var shift;
+let up;
+let left;
+let right;
+let down;
+let space;
+let shift;
 
 //==SOUNDS-&-MUSIC==// Soundtrack taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
-var soundTrack;
-var foodSound1;
-var foodSound2;
+let soundTrack;
+let foodSound1;
+let foodSound2;
 
 //=======TILES==========//
-var respawnTile;
-var neutralTile;
-var borderTile;
-var tile;
-var newTile;
-var dig;
-var nonDig;
-var wrapRnd;
-var newGround;
+let respawnTile;
+let neutralTile;
+let borderTile;
+let tile;
+let newTile;
+let dig;
+let nonDig;
+let wrapRnd;
+let newGround;
+let specialLakeEvent = true;
+let specialLake = [
+	['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+	['w','b','b','b','b','b','b','b','b','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','b','L','b','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
+	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
+	['w','b','b','L','L','L','L','Li','L','L','L','L','b','b','w'],
+	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
+	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','b','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','b','b','b','b','b','b','w'],
+	['w','w','w','w','w','w','L','L','w','w','w','w','w','w','w']
+]
+let uniqueBiome1 = [
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','','']
+]
+let uniqueBiome2 = [
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','','']
+]
+let uniqueBiome3 = []
+let specialBoulderEvent = true;
+let specialFrozenHare = true;
+let specialDig1 = true;
+let specialDig2 = true;
+
+
 
 //=======SCROLLING=====//
-var distanceSignal = new Phaser.Signal();
+let distanceSignal = new Phaser.Signal();
 
 
 //======OBSTACLES=====//
-var rock;
-var water;
-var nonTile;
+let rock;
+let water;
+let nonTile;
 
 //========GROUPS========//
 //The different groups which hold different objects and ties them through common properties
-var centerGroup;
-var borderGroup;
-var isoGroup;
-var obstacleGroup;
-var eventGroup;
-var foodGroup;
-var uiGroup;
-var playerGroup;
+let centerGroup;
+let borderGroup;
+let isoGroup;
+let obstacleGroup;
+let eventGroup;
+let foodGroup;
+let uiGroup;
+let stepGroup;
 
 //========CONTROLS=======//
 //Variables used for controlling the player character
-var Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
+let Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
+//========STEPS==========//
+let walkingSE = false;
+let SEstep;
+
 //Digging is used to check if the player has infact pressed space to dig, default is false
-var digging = false;
+let digging = false;
 //shiftDown tracks the up or down of the shift key
-var shiftDown = false;
+let shiftDown = false;
 //hideCounter is the counter which tracks how many times the player has pressed shift
-var hideCounter = 0;
-var keyCounter = 0;
+let hideCounter = 0;
+let keyCounter = 0;
+
+let worldMap;
+
+let rocker;
+//========NARRATOR=========//
+let narratorState;
+let subtitle;
+let subtitles = {
+	start: {
+		subtitle: "Stanely clicked and shit. And so on.",
+		sound:  'foodsound1'
+	}
+}
 
 //========CONSTANTS========//
 //The constant variables used in game can be editted here
 
 //Camera scale controller
-var zoom = 1.3;
+let zoom = 0.2;
 
 //WorldSize controls the Isometric arrays used for generating the game world
-//example: for ( var i = 0; i < worldSize; i += xxx );
-var worldSize = 3800;
+//example: for ( let i = 0; i < worldSize; i += xxx );
+let worldSize = 3800;
 
 //CenterMap is the absolute center of the map;
-var centerMap = 1900;
+let centerMap = 1900;
 
 //Start is used for the Title screen if false = display Title titleScreen, if true = give player control
-var start = false;
+let start = false;
 
 //the Typical achorPoint for everything
 //0.5 means center of image
-var anchorPoint = 0.5
+let anchorPoint = 0.5
 
 //Player regular speed
-var regularSpeed = 300;
+let regularSpeed = 300;
 
 //Player faster speed
-var fasterSpeed = 350;
+let fasterSpeed = 350;
 
 //Is it snowing?
-var snowing = true;
+let snowing = true;
+
+const TILESIZE = 70;
 
 //number of key strokes until monster
-var keysToMonster = 50;
+let keysToMonster = 50;
 
 //=======HUNGER-CONSTANTS=========//
 //Hunger meter
-var hungerMeter
+let hungerMeter
 //Hunger rate how much you loose per 30 seconds
-var hungerRate = 10;
+let hungerRate = 10;
 //Hungermax
-var hungerMax = 200;
+let hungerMax = 200;
 //How much food replenishes
-var nutrition = 60;
+let nutrition = 60;
 //=========DEVELOPER=============//
-// var chaseCounter = 0;
+// let chaseCounter = 0;
+// let developerMode = true;
+// if (developerMode == true){
+// 	let zoom = 1;
+// }
 
 //==========GAME============//
 //Initiate Game Object
 //declare width,height & functions -- this is our main Object
-var game = new Phaser.Game( window.width, window.height, Phaser.AUTO, '', {
+let game = new Phaser.Game( window.width, window.height, Phaser.AUTO, '', {
 	preload: preload,
+	render: render,
 	create: create,
 	update: update
 } );
@@ -178,6 +252,7 @@ function preload() {
 	game.load.image( 'danger', 'assets/images/dangerFilter.png');
 	game.load.image( 'monsterTemp', 'assets/images/monster.png');
 	game.load.image( 'nothing', 'assets/images/nothing.png');
+	game.load.image( 'SEstep', 'assets/images/steps.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -195,8 +270,12 @@ function preload() {
 	game.iso.anchor.setTo( anchorPoint, 0 );
 }
 
+function render(){
+	obstacleGroup.forEach(function (tile){
+		game.debug.body(tile, 'rgba(255,0,0,1)', false);
+	})
+}
 //========CREATE()========//
-
 
 function create() {
 	game.stage.backgroundColor = "#ffffff";
@@ -211,6 +290,8 @@ function create() {
 	centerGroup = game.add.group();
 	//BORDERGROUP is...
 	borderGroup = game.add.group();
+	//STEPGROUP is...
+	stepGroup = game.add.group();
 	//EVENTGROUP is...
 	eventGroup = game.add.group();
 	//OBSTACLEGROUP is...
@@ -240,8 +321,6 @@ function create() {
 	spawnBorder();
 	//spawnTiles creates the base layer of the world (i.e. the initial worldSize)
 	spawnTiles();
-	//spawnDig creates the food stashs located around the map
-	// spawnDig();
 	//initPlayer creates the player
 	initPlayer();
 	//initFood creates the food gameObject & animations we'll be using
@@ -256,6 +335,7 @@ function create() {
 	initFilters();
 	//initMonster creates the monster and its animations
 	initMonster();
+
 
 	//------------SIGNALS-------------//
 	distanceSignal.add(newTiles, this);
@@ -284,10 +364,18 @@ function create() {
 	soundTrack.loop = true;
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
 	setTimeout(function(){ soundTrack.play(); }, 500);
+
+	createSubtitles();
+
 }
 
 //========UPDATE()========//
 
+function narrate(key) {
+	subtitle.text = subtitles[key].subtitle;
+	game.sound.play(subtitles[key].sound);
+
+}
 
 function update() {
 	//-----TITLESCREEN-----//
@@ -299,6 +387,7 @@ function update() {
 			title.destroy();
 			// game begins
 			start = true;
+			narrate('start');
 		}, this );
 		// "if game has begun then..."
 	} else {
@@ -313,6 +402,8 @@ function update() {
 		monsterAI();
 		//monsterManager manages the spawning in and out of monster as well as the dangerFilter
 		monsterManager();
+		//------------NARRATOR--------------------//
+		// narrator();
 		//--------COLLISION-&-SORTING-----------//
 		// This is isometric plugin stuff
 		// here we set the collision detection for the obstacleGroup & eventGroup
@@ -321,11 +412,12 @@ function update() {
 		game.physics.isoArcade.collide( monster, obstacleGroup, monsterSwitch);
 		game.physics.isoArcade.collide (obstacleGroup);
 		game.iso.topologicalSort( obstacleGroup );
-		game.physics.isoArcade.collide( eventGroup );
-		game.iso.topologicalSort( eventGroup );
+		// game.physics.isoArcade.collide( eventGroup );
+		// game.iso.topologicalSort( eventGroup );
 
 		//OVERLAP CHECK, is how we check if the player sprite is over the digging tile & leaves paw prints
 		overlapCheck();
+
 	}
 
 	// console.log area
@@ -434,53 +526,16 @@ function rndNum( num ) {
 // newTiles is the function responsible for changing the biome when you wrap
 function newTiles(){
 	obstacleGroup.forEach(function(tile){
-		wrapRnd = rndNum(40)
-		if ( wrapRnd == 1 ){
-			if (tile.body.enable == false){
-				tile.body.enable = true;
-				tile.loadTexture('rock');
-			} else {
-				tile.loadTexture('rock');
-			}
-		} else if (wrapRnd == 2){
-			if (tile.body.enable == false){
-				tile.body.enable = true;
-				tile.loadTexture('water');
-			} else {
-				tile.loadTexture('water');
-			}
+		if (tile.key == 'playerAnim' || tile.key == 'monsterTemp'){
+			console.log('dont fuck with me')
 		} else {
-			//change monsterTemp to monsterAnim
-			if (tile.key == 'playerAnim' || tile.key == 'monsterTemp'){
-				console.log('dont fuck with me')
-			} else {
-				if (tile.body.enable == true){
-					tile.body.enable = false;
-					tile.loadTexture('nothing');
-				} else {
-					tile.loadTexture('nothing');
-				}
-			}
+			tile.destroy();
 		}
 	});
 	eventGroup.forEach(function(tile){
-		wrapRnd = rndNum(40)
-		if (wrapRnd == 1 || wrapRnd == 2 || wrapRnd == 3){
-			if (tile.body.enable == false){
-				tile.body.enable = true;
-				tile.loadTexture('dig');
-			} else {
-				tile.loadTexture('dig');
-			}
-		} else {
-			if (tile.body.enable == true){
-				tile.body.enable = false;
-				tile.loadTexture('nothing');
-			} else {
-				tile.loadTexture('nothing');
-			}
-		}
+		tile.destroy();
 	});
+	spawnBiome();
 }
 
 //****************FUNCTIONS TBA***********************//
@@ -515,7 +570,7 @@ function initHunger(){
 
 function foodHungerManager(){
 	if (chanceFood == true){
-		var rnd = rndNum(100)
+		let rnd = rndNum(100)
 		if (rnd <= 96){
 			food.body.x = player.body.x;
 			food.body.y = player.body.y;
@@ -538,8 +593,20 @@ function foodHungerManager(){
 			food.animations.play('carrot');
 			foodSound1.play();
 			hungerMeter += nutrition;
-		} else if (rnd >= 97){
-			console.log("artifact get")
+		} else if (rnd == 97 || rnd == 98){
+			//artifact 1 animation here
+
+			specialDig1 = false;
+			if (specialDig1 == false){
+				food.animations.play('puff');
+			}
+		} else if (rnd == 99 || rnd == 100){
+			//artifact 2 animation here
+
+			specialDig2 = false;
+			if (specialDig2 == false){
+				food.animations.play('puff');
+			}
 		}
 		//Make sure HungerMeter is never over 200
 		if (hungerMeter > 200){
@@ -597,9 +664,19 @@ function initFood(){
 	food.alpha = 0;
 }
 
-//function steps(){}
+// function steps(){}
 
-//function narrator(){}
+function createSubtitles(){
+	let style = { font: "65px Arial", fill: "#ff0044", align: "center" };
+	subtitle = game.add.text(game.camera.centerX-300, 0, 'crunchy', style);
+	subtitle.fixedToCamera= true;
+}
+
+
+//initArtifacts
+//function initArtifacts(){}
+
+//function artifactsManager(){}
 
 function monsterManager(){
 
@@ -659,7 +736,7 @@ function initMonster(){
 function monsterAI(){
 	if (monsterSpawned == true){
 		if (monsterPlaced == false){
-			var rndDistance = game.rnd.integerInRange(-700, 700)
+			let rndDistance = game.rnd.integerInRange(-700, 700)
 			if (rndDistance >= 150 || rndDistance <= -150){
 				monster.alpha = 1;
 				monster.body.x = player.body.x + rndDistance;
@@ -822,6 +899,19 @@ function initPlayer() {
 	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
 	player.animations.add('HIDE'[64,65,66,67,68], 10, true);
 
+
+	// SEstep = game.add.isoSprite(0, 0, 0, 'SEstep', 0, stepGroup);
+	// SEstep.anchor.setTo (anchorPoint);
+	//
+	// game.time.events.loop(Phaser.Timer.SECOND, function(){
+	// 	if (walkingSE == true){
+	// 	SEstep = game.add.isoSprite(player.body.x, player.body.y, 0, 'SEstep', 0, stepGroup);
+	// 	SEstep.anchor.setTo (anchorPoint);
+	// 		game.time.events.loop(Phaser.Timer.SECOND, function(){
+	// 			SEstep.alpha = 0;
+	// 		})
+	// 	}
+	// });
 	player.anchor.setTo( anchorPoint );
 	//enable physics on the player
 	game.physics.isoArcade.enable( player );
@@ -889,7 +979,6 @@ function actionPlayer(){
 function inputDown(key){
 	// digging mechanic: if space is pressed then player is digging
 	// *****Must add animation for digging
-	console.log(keyCounter);
 	keyCounter ++;
 	if (hidden === true){
 		if (key === shift || key === up || key === down || key === left || key === right){
@@ -898,7 +987,6 @@ function inputDown(key){
 	} else {
 		if (key === space){
 			digging = true;
-			zoom -= 0.3;
 		}
 		// shift adds 1 to the hideCounter
 		if (key === shift){
@@ -918,6 +1006,7 @@ function inputDown(key){
 		}
 		if (key === right){
 			SEdown = true;
+			walkingSE = true;
 		}
 		if (NWdown == true && NEdown == true ){
 			NEdown = false;
@@ -951,6 +1040,7 @@ function inputUp(key){
 	NEdown = false;
 	SWdown = false;
 	NWdown = false;
+	walkingSE = false;
 	if( key === space){
 	digging = false;
 	}
@@ -1017,9 +1107,9 @@ function spawnTiles() {
 	// THIS IS THE TEMPLATE USED FOR PLACING EVERYTHING ELSE IN THE GAMEWORLD
 	// The basic function is this: create a loop for the X and then a loop for Y creating a isometric grid
 	// Based on the worldSize we add a tile every X amount of pixels (x is determined by the size of grid squares we want)
-	//so in this loop we're adding a tile every 158px
-	for ( var i = 0; i < worldSize; i += 152 ) {
-		for ( var j = 0; j < worldSize; j += 152 ) {
+	//so in this loop we're adding a tile every 152px
+	for ( let i = 0; i < worldSize; i += 140 ) {
+		for ( let j = 0; j < worldSize; j += 140 ) {
 			// Create the center platform always white nothing spawns here
 			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
 				respawnTile = game.add.isoSprite( i, j, 0, 'tile2', 0, centerGroup );
@@ -1034,7 +1124,7 @@ function spawnTiles() {
 				neutralTile.body.collideWorldBounds = true;
 			} else {
 			// Create a tile using the new game.add.isoSprite factory method at the specified position.
-				var rnd = rndNum( 2 );
+				let rnd = rndNum( 2 );
 				if ( rnd == 0 ) {
 					newTile = game.add.isoSprite( i, j, 0, 'tile2', 0, isoGroup );
 					newTile.anchor.setTo( anchorPoint, 0 );
@@ -1052,16 +1142,66 @@ function spawnTiles() {
 }
 
 function spawnBiome(){
-	for ( var i = 0; i < worldSize; i += 152 ) {
-		for ( var j = 0; j < worldSize; j += 152 ) {
+	let happen = true;
+	// mapBiom();
+// 	for ( let i = 0; i < worldMap.length; i ++) {
+// 		for ( let j = 0; j < worldMap[i].length; j ++ ) {
+// 			if (worldMap[i][j] === 'w'){
+// 				water = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'water', 0, obstacleGroup );
+// 				water.anchor.setTo( anchorPoint, 0 );
+// 				game.physics.isoArcade.enable( water );
+// 				water.body.collideWorldBounds = true;
+// 				water.body.immovable = true;
+// 			}
+// 			if (worldMap[i][j] === 'r'){
+// 				rock = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'rock', 0, obstacleGroup );
+// 				rock.anchor.setTo( anchorPoint, 0 );
+// 				game.physics.isoArcade.enable( rock );
+// 				rock.body.collideWorldBounds = true;
+// 				rock.body.immovable = true;
+// 			}
+// 		}
+// 	}
+// }
+	for ( let i = 0; i < worldSize; i += 70 ) {
+		for ( let j = 0; j < worldSize; j += 70 ) {
 			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
-
+				//don't spawn anything here
 			} else {
 				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
-
+					//don't spawn anything here either
 				} else {
-					var rnd = rndNum( 40 );
-					if ( rnd == 1 ) {
+					let rnd = rndNum(40);
+					if (rnd == 4){
+						if (specialLakeEvent == true){
+							if (i >= 1400 && j <= 1400 && i <= 1500 && j >= 1000){
+								console.log("Adding a lake")
+						for ( let g = 0; g < specialLake.length; g ++) {
+								for ( let h = 0; h < specialLake[g].length; h ++ ) {
+									if (specialLake[g][h] === 'w'){
+										water = game.add.isoSprite( (i + g*TILESIZE)/2, (j + h*TILESIZE)/2, 0, 'water', 0, obstacleGroup);
+										water.anchor.setTo( anchorPoint, 0 );
+										game.physics.isoArcade.enable( water );
+										water.body.collideWorldBounds = true;
+										water.body.immovable = true;
+									}
+									if (specialLake[g][h] === 'r'){
+										rock = game.add.isoSprite( (i + g*TILESIZE)/2, (j + h*TILESIZE)/2, 0, 'rock', 0, obstacleGroup );
+										rock.anchor.setTo( anchorPoint, 0 );
+										game.physics.isoArcade.enable( rock );
+										rock.body.collideWorldBounds = true;
+										rock.body.immovable = true;
+									}
+									specialLakeEvent = false;
+								}
+							}
+						}
+						}
+					}
+						if (i >= 1400 && j <= 1400 && i <= 1500 && j >= 1000){
+
+						} else {
+						if ( rnd == 1 ) {
 						water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
 						water.anchor.setTo( anchorPoint, 0 );
 						game.physics.isoArcade.enable( water );
@@ -1078,29 +1218,35 @@ function spawnBiome(){
 						dig.anchor.setTo( anchorPoint, 0 );
 						game.physics.isoArcade.enable( dig );
 						dig.body.collideWorldBounds = true;
-					} else if (rnd <= 19){
-						nonDig = game.add.isoSprite( i, j, 0, 'nothing', 0, eventGroup );
-						nonDig.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( nonDig );
-						nonDig.body.collideWorldBounds = true;
-						nonDig.body.enable = false;
-					} else if (rnd >= 20){
-						nonTile = game.add.isoSprite(i, j, 0, 'nothing', 0, obstacleGroup );
-						nonTile.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( nonTile );
-						nonTile.body.collideWorldBounds = true;
-						nonTile.body.enable = false;
-						nonTile.body.immovable = true;
 					}
+				}
 				}
 			}
 		}
 	}
 }
 
+function mapBiom(){
+	uniqueBiome2 = [];
+	for ( let i = 0; i < worldSize/35; i += 1 ) {
+		worldMap.push([]);
+		for ( let j = 0; j < worldSize/35; j += 1 ) {
+			var rnd = rndNum(100);
+			if (rnd < 3){
+				worldMap[i][j] = 'w';
+			} else if (rnd < 6){
+				worldMap[i][j] = 'r';
+			} else {
+				worldMap[i][j] =' ';
+			}
+		}
+	}
+	console.log(worldMap);
+}
+
 function spawnBorder(){
-	for ( var i = 0; i < worldSize; i += 40 ) {
-		for ( var j = 0; j < worldSize; j += 40 ) {
+	for ( let i = 0; i < worldSize; i += 40 ) {
+		for ( let j = 0; j < worldSize; j += 40 ) {
 			if ((i >= 0 && j <= 40) || (i <= 40 && j >= 0) || (i >= 3760 && j <= 3800) || (i <= 3800 && j >= 3760)) {
 				borderTile = game.add.isoSprite( i, j, 0, '', 0, borderGroup );
 				borderTile.anchor.setTo( anchorPoint, 0 );
