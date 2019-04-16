@@ -21,6 +21,8 @@ var fullHungerBar;
 var emptyHungerBar;
 var chanceFood = false;
 var food;
+var justAte = false;
+
 //Player movement speed
 var speed;
 var playerHiding = false;
@@ -147,7 +149,8 @@ function preload() {
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
-	game.load.spritesheet( 'foodAnim', 'assets/images/foodSpriteSheet.png', 105, 352 );
+	//game.load.spritesheet('spriteSheetName', 'yoursprite.png', yourframewidth, yourframeheight, yournumberofframes);
+	game.load.spritesheet( 'foodAnim', 'assets/images/foodSpriteSheet.png', 15, 88, 28);
 	// This adds the Phaser Isometric Plugin
 	game.plugins.add( new Phaser.Plugin.Isometric( game ) );
 	// In order to have the camera move, we need to set our worldBounds
@@ -176,12 +179,12 @@ function create() {
 	centerGroup = game.add.group();
 	//BORDERGROUP is...
 	borderGroup = game.add.group();
-	//FOODGROUP is...
-	foodGroup = game.add.group();
 	//EVENTGROUP is...
 	eventGroup = game.add.group();
 	//OBSTACLEGROUP is...
 	obstacleGroup = game.add.group();
+	//FOODGROUP is...
+	foodGroup = game.add.group();
 	//UIGROUP is...
 	uiGroup = game.add.group();
 
@@ -209,6 +212,7 @@ function create() {
 	spawnDig();
 	//initPlayer creates the player
 	initPlayer();
+	initFood();
 	//spawnWater creates the bodies of water located on the map
 	spawnWater();
 	//spawnRocks creates the bolders found around the map
@@ -219,6 +223,7 @@ function create() {
 	initHunger();
 	//initObscure sets a filter to be positioned precisely where we need it
 	initObscure();
+	//initFood creates the food gameObject & animations we'll be using
 
 	//------------SIGNALS-------------//
 	distanceSignal.add(newTiles, this);
@@ -286,7 +291,6 @@ function update() {
 
 	// console.log area
 	// this area is called wether or not start is true
-	// console.log(player.body.x, player.body.y);
 
 }
 
@@ -414,10 +418,12 @@ function initHunger(){
 	//Every 10 seconds change the alpha and update hungerMeter
 	game.time.events.loop(Phaser.Timer.SECOND*10, function(){
 		if (hungerMeter > 0) {
-			if (hiding == true){
-				hungerMeter -= hungerRate*2
-			} else {
-				hungerMeter -= hungerRate
+			if (justAte == false){
+				if (hidden == true){
+					hungerMeter -= hungerRate*2
+				} else {
+					hungerMeter -= hungerRate
+				}
 			}
 			fullHungerBar.alpha = hungerMeter/200
 			emptyHungerBar.alpha = (1 - (hungerMeter/200));
@@ -431,16 +437,24 @@ function initHunger(){
 function foodHungerManager(){
 	if (chanceFood == true){
 		var rnd = rndNum(100)
+		if (rnd <= 96){
+			food.body.x = player.body.x;
+			food.body.y = player.body.y;
+			food.alpha = 1;
+		}
 		if (rnd < 25){
-			//You get nothing, snow puff animation
+			food.animations.play('puff');
 		} else if (rnd >= 25 && rnd < 50){
-			//You get an acorn, acorn animation, + 15 hungerMeter, delay starveOrEat in hunger function
+			//You get an acorn, acorn animation, + 15 hungerMeter
+			food.animations.play('acorn');
 			hungerMeter += nutrition/4;
 		} else if (rnd >= 50 && rnd < 75){
-			//You get a potato, potato animation, + 30 hungerMeter, delay ''
+			//You get a potato, potato animation, + 30 hungerMeter
+			food.animations.play('potato');
 			hungerMeter += nutrition/2;
 		} else if (rnd >= 75 && rnd < 97){
-			//You get a Carrot, carrot animation, + 60 hungerMeter, delay ''
+			//You get a Carrot, carrot animation, + 60 hungerMeter
+			food.animations.play('carrot');
 			hungerMeter += nutrition;
 		} else if (rnd >= 97){
 			console.log("artifact get")
@@ -468,6 +482,33 @@ function initObscure(){
 	obscureFilter.alpha = 0;
 }
 
+function initFood(){
+	food = game.add.isoSprite( 1900, 1900, 0, 'foodAnim', 0, foodGroup);
+
+	food.animations.add('carrot', [0, 1, 2, 3, 4, 5, 6], 10, false);
+	food.animations.add('potato', [7, 8, 9, 10, 11, 12, 13], 10, false);
+	food.animations.add('acorn', [14, 15, 16, 17, 18, 19, 20], 10, false);
+	food.animations.add('puff', [21, 22, 23, 24, 25, 26, 27], 10, false);
+
+	// INSTEAD OF ONCOMPLETE US THIS !!!!!
+	// delay substraction of foodRate by 30seconds in hunger function
+	food.events.onAnimationComplete.add(function() {
+		if (food.animations.currentAnim.name == 'puff'){
+			food.alpha = 0;
+		} else {
+			food.alpha = 0;
+			justAte = true;
+			game.time.events.add(Phaser.Timer.SECOND*30, function(){
+				justAte = false;
+			}, this);
+		}
+	}, this);
+
+	food.anchor.setTo( anchorPoint );
+	game.physics.isoArcade.enable( food );
+	food.body.collideWorldBounds = true;
+	food.alpha = 0;
+}
 //function steps(){}
 
 //function narrator(){}
