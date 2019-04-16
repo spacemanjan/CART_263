@@ -575,6 +575,10 @@ function monsterManager(){
 			dangerFilter.alpha -= 0.01;
 		}
 	}
+
+	if (monsterSpawned == true && hidden == false){
+		chase = true;
+	}
 }
 
 function initMonster(){
@@ -950,9 +954,12 @@ function playerAnim(){
 	       	player.animations.stop();
 	}
 	if (monsterDistance < 35){
-		//add monster killing player animation here
-		player.kill();
-		chase = false;
+		if (hidden = false){
+			//add monster killing player animation here
+			
+			player.kill();
+			chase = false;
+		}
 	}
 }
 
