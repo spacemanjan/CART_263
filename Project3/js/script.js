@@ -38,8 +38,10 @@ var down;
 var space;
 var shift;
 
-//==SOUNDTRACK==// taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
+//==SOUNDS-&-MUSIC==// Soundtrack taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
 var soundTrack;
+var foodSound1;
+var foodSound2;
 
 //=======TILES==========//
 var respawnTile;
@@ -130,6 +132,8 @@ var game = new Phaser.Game( window.width, window.height, Phaser.AUTO, '', {
 function preload() {
 	//-----------SOUNDS----------//
 	game.load.audio('music',['assets/sounds/PeacefulPiano.mp3']);
+	game.load.audio('foodsound1',['assets/sounds/foodSound.mp3']);
+	game.load.audio('foodsound2',['assets/sounds/anotherFoodSound.mp3']);
 
 	//-----------IMAGES-----------//
 	//********NEED TO CHANGE THE NAMES OF THESE CUZ THEY CONFUSING
@@ -243,9 +247,11 @@ function create() {
 
 	manageKeys();
 
-	//----------MUSIC------------//
+	//----------MUSIC-&-SOUNDS------------//
 	//add audio track "music" set it to the soundTrack variable
 	soundTrack = game.add.audio('music');
+	foodSound1 = game.add.audio('foodsound1');
+	foodSound2 = game.add.audio('foodsound2');
 	//set music looping to true
 	soundTrack.loop = true;
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
@@ -447,14 +453,17 @@ function foodHungerManager(){
 		} else if (rnd >= 25 && rnd < 50){
 			//You get an acorn, acorn animation, + 15 hungerMeter
 			food.animations.play('acorn');
+			foodSound1.play();
 			hungerMeter += nutrition/4;
 		} else if (rnd >= 50 && rnd < 75){
 			//You get a potato, potato animation, + 30 hungerMeter
 			food.animations.play('potato');
+			foodSound2.play();
 			hungerMeter += nutrition/2;
 		} else if (rnd >= 75 && rnd < 97){
 			//You get a Carrot, carrot animation, + 60 hungerMeter
 			food.animations.play('carrot');
+			foodSound1.play();
 			hungerMeter += nutrition;
 		} else if (rnd >= 97){
 			console.log("artifact get")
