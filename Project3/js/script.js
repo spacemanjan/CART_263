@@ -940,7 +940,7 @@ function playerAnim(){
 			}
 			if (player.frame == 66){
 				player.animations.paused = true;
-				if (hidden = false){
+				if (hidden == false){
 					player.animations.paused = false;
 				}
 			}
@@ -954,15 +954,16 @@ function playerAnim(){
 	       	player.animations.stop();
 	}
 	if (monsterDistance < 35){
-		if (hidden = false){
+		//hidden might/should be playerHiding
+
+		if (hidden == false && monsterSpawned == true ){
 			//add monster killing player animation here
-			
+
 			player.kill();
 			chase = false;
 		}
 	}
 }
-
 
 //=========WORLD-MAKING-FUNCTIONS============//
 // In this section is located all the functions called in Create() which make the isometric landscape
@@ -996,7 +997,7 @@ function spawnTiles() {
 					game.physics.isoArcade.enable( newTile );
 					newTile.body.collideWorldBounds = true;
 				} else {
-					tile = game.add.isoSprite( i, j, 0, 'tile', 0, isoGroup );
+					tile = game.add.isoSprite( i, j, 0, 'tile2', 0, isoGroup );
 					tile.anchor.setTo( anchorPoint, 0 );
 					game.physics.isoArcade.enable( tile );
 					tile.body.collideWorldBounds = true;
@@ -1010,14 +1011,22 @@ function spawnDig() {
 	for ( var i = 0; i < worldSize; i += 38 ) {
 		for ( var j = 0; j < worldSize; j += 38 ) {
 			//randomly pick tiles to place so in this case 1:21 chance of being placed (i guess, honestly im no good at math)
-			var rnd = rndNum( 40 );
-			if ( rnd == 2 ) {
-				dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
-				dig.anchor.setTo( anchorPoint, 0 );
-				// newGround = game.add.isoSprite( i, j, 0, 'dug', 0, foodGroup );
-				// newGround.anchor.setTo( 0.5, 0);
-				game.physics.isoArcade.enable( dig );
-				dig.body.collideWorldBounds = true;
+			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
+
+			} else {
+				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
+
+				} else {
+					var rnd = rndNum( 100 );
+					if ( rnd == 2 ) {
+						dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
+						dig.anchor.setTo( anchorPoint, 0 );
+						// newGround = game.add.isoSprite( i, j, 0, 'dug', 0, foodGroup );
+						// newGround.anchor.setTo( 0.5, 0);
+						game.physics.isoArcade.enable( dig );
+						dig.body.collideWorldBounds = true;
+					}
+				}
 			}
 		}
 	}
@@ -1026,13 +1035,21 @@ function spawnDig() {
 function spawnWater() {
 	for ( var i = 0; i < worldSize; i += 38 ) {
 		for ( var j = 0; j < worldSize; j += 38 ) {
-			var rnd = rndNum( 40 );
-			if ( rnd == 1 ) {
-				water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-				water.anchor.setTo( anchorPoint, 0 );
-				game.physics.isoArcade.enable( water );
-				water.body.collideWorldBounds = true;
-				water.body.immovable = true;
+			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
+
+			} else {
+				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
+
+				} else {
+					var rnd = rndNum( 40 );
+					if ( rnd == 1 ) {
+						water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
+						water.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( water );
+						water.body.collideWorldBounds = true;
+						water.body.immovable = true;
+					}
+				}
 			}
 		}
 	}
@@ -1041,14 +1058,22 @@ function spawnWater() {
 function spawnRocks() {
 	for ( var i = 0; i < worldSize; i += 38 ) {
 		for ( var j = 0; j < worldSize; j += 38 ) {
-			//randomly pick tiles to place so in this case 1:21 chance of being placed (i guess, honestly im no good at math)
-			var rnd = rndNum( 40 );
-			if ( rnd == 0 ) {
-				rock = game.add.isoSprite( i, j, 0, 'rock', 0, obstacleGroup );
-				rock.anchor.setTo( anchorPoint, 0 );
-				game.physics.isoArcade.enable( rock );
-				rock.body.collideWorldBounds = true;
-				rock.body.immovable = true;
+			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
+
+			} else {
+				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
+
+				} else {
+					//randomly pick tiles to place so in this case 1:21 chance of being placed (i guess, honestly im no good at math)
+					var rnd = rndNum( 40 );
+					if ( rnd == 0 ) {
+						rock = game.add.isoSprite( i, j, 0, 'rock', 0, obstacleGroup );
+						rock.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( rock );
+						rock.body.collideWorldBounds = true;
+						rock.body.immovable = true;
+					}
+				}
 			}
 		}
 	}
