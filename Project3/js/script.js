@@ -23,6 +23,9 @@ var chanceFood = false;
 var food;
 //Player movement speed
 var speed;
+var playerHiding = false;
+var hidden = false;
+var obscureFilter;
 
 
 //=========KEYBOARD=======//
@@ -140,6 +143,7 @@ function preload() {
 	game.load.image( 'indtile', 'assets/images/tile.png');
 	game.load.image( 'fullStomach', 'assets/images/goodHunger.png' );
 	game.load.image( 'starving', 'assets/images/badHunger.png' );
+	game.load.image( 'obscure', 'assets/images/hiddenFilter.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -213,6 +217,8 @@ function create() {
 	snowEmitter();
 	//initHunger creates the hungerMeter graphics & starts a looping timer event
 	initHunger();
+	//initObscure sets a filter to be positioned precisely where we need it
+	initObscure();
 
 	//------------SIGNALS-------------//
 	distanceSignal.add(newTiles, this);
@@ -263,7 +269,7 @@ function update() {
 		cameraControl();
 		//-----------PLAYER CONTROLS------------//
 		playerAnim();
-		movePlayer();
+		actionPlayer();
 		//--------COLLISION-&-SORTING-----------//
 		// This is isometric plugin stuff
 		// here we set the collision detection for the obstacleGroup & eventGroup
@@ -451,6 +457,14 @@ function foodHungerManager(){
 	}
 }
 
+function initObscure(){
+	obscureFilter = game.add.sprite( game.camera.x-55, game.camera.y-40, 'obscure' );
+	obscureFilter.fixedToCamera = true;
+	obscureFilter.scale.setTo(0.4,0.4);
+	obscureFilter.alpha = 0;
+
+}
+
 //function steps(){}
 
 //function narrator(){}
@@ -459,12 +473,13 @@ function foodHungerManager(){
 
 //function endingScene(){}
 
+
 //========PLAYER-FUNCTIONS=========//
 //*****COMMENTS NEEDED HERE
 // Initiate Player, player is created and placed in the world,manages his directional animations
 function initPlayer() {
 	//set the player & place it in the obstacle group so it can collide and overlap check + be topologically sorted properly
-	player = game.add.isoSprite( centerMap, centerMap, 0, 'playerAnim', 0, obstacleGroup );
+	player = game.add.isoSprite( centerMap, centerMap, 0, 'playerAnim', 0, obstacleGroup);
 
 	// add the animations from the spritesheet
 	player.animations.add('S', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
@@ -475,6 +490,7 @@ function initPlayer() {
 	player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
 	player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
 	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
+	player.animations.add('HIDE'[64,65,66,67,68], 10, true);
 
 	player.anchor.setTo( anchorPoint );
 	//enable physics on the player
@@ -483,11 +499,15 @@ function initPlayer() {
 	player.body.collideWorldBounds = true;
 }
 
-function movePlayer(){
+function actionPlayer(){
 	if (digging == true ) {
 		player.body.velocity.x = 0;
 		player.body.velocity.y = 0;
 	} else if (digging == false){
+		if (hideCounter == 5){
+			playerHiding = true;
+			hideCounter = 0;
+		}
 		if (Ndown == true) {
 		   player.body.velocity.y = -speed;
 		   player.body.velocity.x = -speed;
@@ -539,47 +559,53 @@ function movePlayer(){
 function inputDown(key){
 	// digging mechanic: if space is pressed then player is digging
 	// *****Must add animation for digging
-	if (key === space){
-		digging = true;
-	}
-	// shift adds 1 to the hideCounter
-	if (key === shift){
-		if (shiftDown == false){
-			hideCounter ++;
+	if (hidden === true){
+		if (key === shift || key === up || key === down || key === left || key === right){
+			hidden = false
 		}
-		shiftDown = true;
-	}
-	if (key === up){
-		NEdown = true;
-	}
-	if (key === down){
-		SWdown = true;
-	}
-	if (key === left){
-		NWdown = true;
-	}
-	if (key === right){
-		SEdown = true;
-	}
-	if (NWdown == true && NEdown == true ){
-		NEdown = false;
-		NWdown = false;
-		Ndown = true;
-	}
-	if (NEdown == true && SEdown == true ){
-		NEdown = false;
-		SEdown = false;
-		Edown = true;
-	}
-	if (NWdown == true && SWdown == true ){
-		NWdown = false;
-		SWdown = false;
-		Wdown = true;
-	}
-	if (SWdown == true && SEdown == true ){
-		SWdown = false;
-		SEdown = false;
-		Sdown = true;
+	} else {
+		if (key === space){
+			digging = true;
+		}
+		// shift adds 1 to the hideCounter
+		if (key === shift){
+			if (shiftDown == false){
+				hideCounter ++;
+			}
+			shiftDown = true;
+		}
+		if (key === up){
+			NEdown = true;
+		}
+		if (key === down){
+			SWdown = true;
+		}
+		if (key === left){
+			NWdown = true;
+		}
+		if (key === right){
+			SEdown = true;
+		}
+		if (NWdown == true && NEdown == true ){
+			NEdown = false;
+			NWdown = false;
+			Ndown = true;
+		}
+		if (NEdown == true && SEdown == true ){
+			NEdown = false;
+			SEdown = false;
+			Edown = true;
+		}
+		if (NWdown == true && SWdown == true ){
+			NWdown = false;
+			SWdown = false;
+			Wdown = true;
+		}
+		if (SWdown == true && SEdown == true ){
+			SWdown = false;
+			SEdown = false;
+			Sdown = true;
+		}
 	}
 }
 
@@ -617,6 +643,24 @@ function playerAnim(){
 	        player.animations.play('W');
 	} else if (Ndown == true ){
 			player.animations.play('N');
+	} else if (playerHiding == true){
+			player.animations.play('HIDE');
+			hidden = true;
+			if (obscureFilter.alpha < 1){
+			obscureFilter.alpha += 0.01;
+			}
+			if (player.frame == 66){
+				player.animations.paused = true;
+				if (hidden = false){
+					player.animations.paused = false;
+				}
+			}
+			player.animations.currentAnim.onComplete.add(function() {
+				if (obscureFilter.alpha > 0){
+					obscureFilter.alpha -= 0.01;
+				} else {
+					playerHiding = false;
+				}; }, this);
 	} else{
 	       	player.animations.stop();
 	}
