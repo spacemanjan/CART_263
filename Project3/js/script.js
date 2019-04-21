@@ -73,7 +73,7 @@ let specialLake = [
 	['w','b','b','b','b','b','b','L','b','b','b','b','b','b','w'],
 	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
 	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
-	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
+	['w','b','b','b','L','L','L','r','L','L','L','b','b','b','w'],
 	['w','b','b','L','L','L','L','Li','L','L','L','L','b','b','w'],
 	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
 	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
@@ -114,7 +114,7 @@ let specialFrozenHare = true;
 let specialDig1 = true;
 let specialDig2 = true;
 
-
+let artifact1;
 
 //=======SCROLLING=====//
 let distanceSignal = new Phaser.Signal();
@@ -135,6 +135,8 @@ let eventGroup;
 let foodGroup;
 let uiGroup;
 let stepGroup;
+let debugGroup;
+let collectGroup;
 
 //========CONTROLS=======//
 //Variables used for controlling the player character
@@ -158,9 +160,269 @@ let rocker;
 let narratorState;
 let subtitle;
 let subtitles = {
-	start: {
-		subtitle: "Stanely clicked and shit. And so on.",
-		sound:  'foodsound1'
+	a0: {
+		subtitle: "In the depths of a land far away the snow falls quietly, nothing disturbs the tranquility.... except... for you caught in the snow-drift.",
+		sound:  'a0'
+	},
+	a1: {
+		subtitle: "In the midst of a snowy landscape a hare awakes in an unfamiliar place, no friends and no shelter in which to burrow in and hide from the cold",
+		sound:  'a1'
+	},
+	a2: {
+		subtitle: "What could the hare be doing in such a desolate place, he was quite unsure of what had brought him here or who…",
+		sound:  'a2'
+	},
+	a3: {
+		subtitle: "The hare moved around to get a accustomed to this strange new place, he hoped & hoped leaving little paw prints as he went",
+		sound:  'a3'
+	},
+	a4: {
+		subtitle: "The hare couldn’t believe what he was seeing, he had never seen so much snow before in all his life",
+		sound:  'a4'
+	},
+	a5: {
+		subtitle: "Suddenly the hare realized he was starving, he had no idea how long he’d slept but it must have been an awful long time because he was so hungry he could eat all the carrots in the world",
+		sound:  'a5'
+	},
+	a6: {
+		subtitle: "A little lump was under his foot and the hare could tell there was something buried under the snow",
+		sound:  'a6'
+	},
+	a7: {
+		subtitle: "Maybe if you pressed the spacebar you’ll start digging",
+		sound:  'a7'
+	},
+	a8: {
+		subtitle: "The hare felt much better after eating and decided he’d better start exploring to see what else he could find perhaps something more to eat!",
+		sound:  'a8'
+	},
+	a9: {
+		subtitle: "As the little hare hopped around he was starting to think about where exactly he was…. he didn’t remember falling asleep here.... In fact he didn’t remember anything at all",
+		sound:  'a9'
+	},
+	a10: {
+		subtitle: "When the little hare could finally here the creature no more he jumped out of his hole and thought to himself “what in the world could that have been” …maybe he didn’t want to find out",
+		sound:  'a10'
+	},
+	a11: {
+		subtitle: "Whatever it was the hare certainly wanted to stay as far away from it as possible but he couldn’t hear it anymore… all he could think of was the sound it made like bones softly rubbing against each other, the smell of something dying and it’s dark undulating flesh…",
+		sound:  'a11'
+	},
+	a12: {
+		subtitle: "a weird hook? As the hare takes it the markings seemingly glow briefly, and the hare imagines a sunken city dark and abandoned by time",
+		sound:  'a12'
+	},
+	a13: {
+		subtitle: "at the foot of the statue is an old leather bound book, the cover was worn, a dirty from exposure to the elements but still clearly on its spine the words “shogg-agl” and the hare begins imagining awaking from a dream",
+		sound:  'a13'
+	},
+	a15: {
+		subtitle: "this was not food, and although it looked appetizing to a starving hare, every bone in his delicate body screamed at him not to eat it, a bloody mass of dark bubbly flesh which reeked like hell, it reminded him of things, things he was sure he had no memories of",
+		sound:  'a15'
+	},
+	a16: {
+		subtitle: "the black hare had dug up something, it was short and sharp with a feather attached at it’s hilt, and the smell of blood was still fresh on it",
+		sound:  'a16'
+	},
+	a17: {
+		subtitle: "the black hare had now quite the collection of odd trinkets, each one seemed to emit an unpleasant aura, his mind fixed itself to these objects and without any warning the hare collapsed into a dreamless sleep",
+		sound:  'a17'
+	},
+	b0: {
+		subtitle: "You stare blankly at the screen, as the narrator realizes that an idiot is playing his game… why don’t you click to start your adventure",
+		sound:  'b0'
+	},
+	b00: {
+		subtitle: "Alright you’ve had your fun, now click the game and start playing",
+		sound:  'b00'
+	},
+	b000: {
+		subtitle: "Well now you’re just trying to hurt my feelings… I put a lot of work into this game, and I’m not gonna just let you stare at the title screen and waste my time",
+		sound:  'b000'
+	},
+	b0000: {
+		subtitle: "You know what… that’s it. You’ve officially hurt my feelings, I’m leaving and I promise you won’t be hearing from me again… I hope it was worth it",
+		sound:  'b0000'
+	},
+	b1: {
+		subtitle: "OH! (cough/clear throat)",
+		sound:  'b1'
+	},
+	b11: {
+		subtitle: "Hey so I noticed you’ve already played like the majority of this game so do you mind if I take a break, cool thanks I’m oh so hungry I’m definitely getting something greasy to eat & you know where that goes Oh yeah bb straight to the hips, alright enough from me have fun!",
+		sound:  'b11'
+	},
+	b2: {
+		subtitle: "orrrrrr….. He didn’t and instead took in the sight of this frightening strange land too terrified to move a muscle",
+		sound:  'b2'
+	},
+	b3: {
+		subtitle: "oh aren’t you clever... figuring all out on your own",
+		sound:  'b3'
+	},
+	b4: {
+		subtitle: "rather than following his instinct the hare decided he’d be better of instead trying to stand as still as a statue until he froze to death",
+		sound:  'b4'
+	},
+	b5: {
+		subtitle: "you know usually when a random voice tells you to do something in a game it’s usually best to do it but I get it you’re not gonna listen to me, maybe you just don’t like having people tell you what to do, your not gonna take it, I like your style but you’re still dead so...",
+		sound:  'b5'
+	},
+	b6: {
+		subtitle: "Hey! Have you forgotten about me, your still playing this, you can quit at any time no one is forcing you to play this, by all means stop if you’re busy",
+		sound:  'b6'
+	},
+	b7: {
+		subtitle: "Just wanted to let you know you’re doing a great job, just incase you were wondering",
+		sound:  'b7'
+	},
+	dhd: {
+		subtitle: "the hare couldn’t find anything to eat, he lacked the energy to move and so rested in the snow until sleep took him and he dreamed of warm burrows and plenty of carrots",
+		sound:  'dhd'
+	},
+	d0: {
+		subtitle: "and freeze & starve he did, the snow kept falling, the hare didn’t move a muscle, not a thought passed through his dumb little hare brain, he simply was and then slowly was… no more",
+		sound:  'd0'
+	},
+	d00: {
+		subtitle: "for some reason the hare immediately jumped from his hole, maybe to make a run for it, maybe he thought he was in a dream and would immediately awake in a warm burrow… we’ll never know",
+		sound:  'd00'
+	},
+	d000: {
+		subtitle: "“as if by some ancient magik the hare jumped out of his, as the creature charged at him with what the hare assumed was his face he thought he hear a voice ring out from deep in his mind geb ch’gnaiih nog mnahn’ grahn’ stell’bsna r’luh c-shogg y-s’uhn nilgh’ri y-wgah’n… and then nothing more",
+		sound:  'd000'
+	},
+	d0000: {
+		subtitle: "it came at him so fast the hare couldn’t react, suddenly flesh and bones were upon him, the sound of muffled bones scraping against each other and the words ya nog hai shagg-oth",
+		sound:  'd0000'
+	},
+	d00000: {
+		subtitle: "the hare’s journey had come to a tragic end, all that work, all that walking, all that hiding, all of it just another snow flake in the wind...",
+		sound:  'd00000'
+	},
+	d1: {
+		subtitle: "the hare suddenly felt a chill run down his furry little spine, danger was nearby and he needed to hide fast",
+		sound:  'd1'
+	},
+	d2: {
+		subtitle: "the hare didn’t know what to do he was so scared he panicked and pressed the shift key five times",
+		sound:  'd2'
+	},
+	d3: {
+		subtitle: "he couldn’t see much hiding away in the snow as he was but the hare could hear a terrible thing prowling near him",
+		sound:  'd3'
+	},
+	d4: {
+		subtitle: "through his little hole the dark little hare saw a horrible feral beast, he wasn’t quite sure what it was but it made an awful noise and didn’t make any sense to him… the hare was very glad to be hiding indeed",
+		sound:  'd4'
+	},
+	d5: {
+		subtitle: "that same feeling crept up again, the little hare knew he had a precious few moments to spare to hide away very quickly",
+		sound:  'd5'
+	},
+	d6: {
+		subtitle: "there it was again that premonition was he being hunted?, what was it looking for? All the hare knew was  that he needed to hide very quickly",
+		sound:  'd6'
+	},
+	d8: {
+		subtitle: "like nails against a chalkboard, that feeling sent the hairs on the hare’s back straight, it was coming",
+		sound:  'd8'
+	},
+	d9: {
+		subtitle: "the dream would be left to continue to play out it’s sad tune, the old ones left to play their games, and the hare never to escape his torture in that cold land",
+		sound:  'd9'
+	},
+	e0: {
+		subtitle: "the hare was pleasantly surprised to find his first taste of food after so long ...can you imagine?",
+		sound:  'e0'
+	},
+	e000: {
+		subtitle: "mmmmm an acorn, what a pleasant surprise, not very nutritious but hardy and it had a nice crunch to it",
+		sound:  'e000'
+	},
+	e0000: {
+		subtitle: "what luck a potato, that most reliable of foods, maybe this land was more fruitful then he had first thought",
+		sound:  'e000'
+	},
+	e00000: {
+		subtitle: "a carrot, even if it was dry and frosted, the hare was happy even if it was only briefly",
+		sound:  'e000'
+	},
+	e1: {
+		subtitle: "the hare was getting very hungry again, he’d better find some food quick before he starved to death",
+		sound:  'e000'
+	},
+	e2: {
+		subtitle: "the hare was so very hungry now he felt very woozy and new if he couldn’t find food soon then he’d surely die",
+		sound:  'e000'
+	},
+	f0: {
+		subtitle: "The snow kept falling and falling and falling and falling and falling, the whole world seem to be nothing but snow… how much more would it snow would it ever stop snowing",
+		sound:  'f0'
+	},
+	f1: {
+		subtitle: "The hare had walked so long, he must have gone very far he thought, but everything looked so similar it was impossible to tell",
+		sound:  'f1'
+	},
+	f2: {
+		subtitle: "snow… nothing but snow and rocks… sometimes it felt like the hare would see snow and rocks and lakes and nothing else for the reset of his days",
+		sound:  'f2'
+	},
+	f4: {
+		subtitle: "had he been here before, the hare could have sworn he had, but it was useless to try and discern one patch of snow from another",
+		sound:  'f4'
+	},
+	f5: {
+		subtitle: "the hare decided that lakes were his favorite thing, a refreshing difference from the overwhelming snow, he liked the pale blue and that was enough",
+		sound:  'f4'
+	},
+	f6: {
+		subtitle: "this was not like the other lakes he had come across, for one the ice looked solid and for two it had a little island at its center, how odd the ways of nature the hare mused",
+		sound:  'f6'
+	},
+	f7: {
+		subtitle: "the hare remarked to himself, that this was certainly the nicest set of boulders he’d ever seen, but of course he hadn’t seen that many, nor could he recall much before today, so he felt depressed again and missed the beauty of those rocks",
+		sound:  'f7'
+	},
+	f8: {
+		subtitle: "the hare had never seen a boulder quite like this one, and in fact the more he looked at it the more he could pick apart details, where signs and feature of some unknown representation of a forgotten deity",
+		sound:  'f8'
+	},
+	f9: {
+		subtitle: "at first the hare didn’t know what he was looking at but soon that dreadful sense of familiarity crept over him, there in the snow was a crystal like reflection of him, another hare frozen stiff, was this also to be his fate he wondered",
+		sound:  'f9'
+	},
+	g0: {
+		subtitle: "suddenly it was night, the stars shone in the sky above the hare sparkling strangely almost rhythmically, the snow had died down and the world was completely silent, the hare felt ill at ease, he felt watched by unseen observers of unknowable intent and desires",
+		sound:  'g0'
+	},
+	g1: {
+		subtitle: "nog nai vulgtlagln n’gha hlirgh-nyth shagg",
+		sound:  'g1'
+	},
+	g2: {
+		subtitle: "images began to fill the hare’s mind of long ruined kingdoms, palaces of onyx with algae growing from their doorways, shrines made out to twisted monstrosities, colors undreamt of, half buried temples, gateways to places unknown to sane thought, and eyes green and purple larger than pillars peering deep inside him",
+		sound:  'g2'
+	},
+	g3: {
+		subtitle: "ya uln throd",
+		sound:  'g3'
+	},
+	g4: {
+		subtitle: "the creature was on him, the sleeper and dream of death, the unspoken servant of darkness, the lost old one, the hare could do nothing to stop him from tearing him limb from limb so he ran",
+		sound:  'g4'
+	},
+	g5: {
+		subtitle: "as the creature closed in on him, the frozen lake which extended before him quickly became the hare’s only choice, the ice crunched softly beneath his feet and the stars seem to become pulse brighter with anticipation",
+		sound:  'g5'
+	},
+	g6: {
+		subtitle: "when at the last all hope seemed lost, the monstrosity, that undulating mass of undreamt horror, suddenly fell through the ice, it’s dying cries echoing from everywhere at once then trailing off, leaving only the hare and the silence of the cold land",
+		sound:  'g6'
+	},
+	g7: {
+		subtitle: "the world began to drift and quiver, the hare felt all the hardships lift from his spirit and just as it all was about to fade from existence he finally recalled where he had been before this all began, who he had been, what it had been...",
+		sound:  'g7'
 	}
 }
 
@@ -168,7 +430,7 @@ let subtitles = {
 //The constant variables used in game can be editted here
 
 //Camera scale controller
-let zoom = 0.2;
+let zoom = 1;
 
 //WorldSize controls the Isometric arrays used for generating the game world
 //example: for ( let i = 0; i < worldSize; i += xxx );
@@ -234,6 +496,71 @@ function preload() {
 	game.load.audio('foodsound1',['assets/sounds/foodSound.mp3']);
 	game.load.audio('foodsound2',['assets/sounds/anotherFoodSound.mp3']);
 
+	//-----------NARRATION-----------//
+	game.load.audio('a0',['assets/sounds/a0 Copy.mp3']);
+	game.load.audio('a1',['assets/sounds/a1 Copy.mp3']);
+	game.load.audio('a2',['assets/sounds/a2 Copy.mp3']);
+	game.load.audio('a3',['assets/sounds/a3.mp3']);
+	game.load.audio('a4',['assets/sounds/a4 Copy.mp3']);
+	game.load.audio('a5',['assets/sounds/a5 Copy.mp3']);
+	game.load.audio('a6',['assets/sounds/a6 Copy.mp3']);
+	game.load.audio('a7',['assets/sounds/a7 Copy.mp3']);
+	game.load.audio('a8',['assets/sounds/a8 Copy.mp3']);
+	game.load.audio('a9',['assets/sounds/a9 Copy.mp3']);
+	game.load.audio('a10',['assets/sounds/a10 Copy.mp3']);
+	game.load.audio('a11',['assets/sounds/a11 Copy.mp3']);
+	game.load.audio('a12',['assets/sounds/a12 Copy.mp3']);
+	game.load.audio('a13',['assets/sounds/a13 Copy.mp3']);
+	game.load.audio('a15',['assets/sounds/a15 Copy.mp3']);
+	game.load.audio('a16',['assets/sounds/a16 Copy.mp3']);
+	game.load.audio('a17',['assets/sounds/a17_done.mp3']);
+	game.load.audio('b0',['assets/sounds/b0 Copy.mp3']);
+	game.load.audio('b00',['assets/sounds/b00 Copy.mp3']);
+	game.load.audio('b000',['assets/sounds/b000 Copy.mp3']);
+	game.load.audio('b0000',['assets/sounds/b0000 Copy.mp3']);
+	game.load.audio('b1',['assets/sounds/b1 Copy.mp3']);
+	game.load.audio('b2',['assets/sounds/b2 Copy.mp3']);
+	game.load.audio('b3',['assets/sounds/b3 Copy.mp3']);
+	game.load.audio('b4',['assets/sounds/b4 Copy.mp3']);
+	game.load.audio('b5',['assets/sounds/b5 Copy.mp3']);
+	game.load.audio('b6',['assets/sounds/b6 Copy.mp3']);
+	game.load.audio('b7',['assets/sounds/b7 Copy.mp3']);
+	game.load.audio('b11',['assets/sounds/b11 Copy.mp3']);
+	game.load.audio('dhd',['assets/sounds/dhd Copy.mp3']);
+	game.load.audio('d0',['assets/sounds/d0 Copy.mp3']);
+	game.load.audio('d00',['assets/sounds/d00.mp3']);
+	game.load.audio('d0000',['assets/sounds/d0000.mp3']);
+	game.load.audio('d00000',['assets/sounds/d00000 Copy.mp3']);
+	game.load.audio('d1',['assets/sounds/d1 Copy.mp3']);
+	game.load.audio('d2',['assets/sounds/d2 Copy.mp3']);
+	game.load.audio('d3',['assets/sounds/d3 Copy.mp3']);
+	game.load.audio('d4',['assets/sounds/d4 Copy.mp3']);
+	game.load.audio('d5',['assets/sounds/d5 Copy.mp3']);
+	game.load.audio('d6',['assets/sounds/d6 Copy.mp3']);
+	game.load.audio('d8',['assets/sounds/d8 Copy.mp3']);
+	game.load.audio('d9',['assets/sounds/d9 Copy.mp3']);
+	game.load.audio('e0',['assets/sounds/e0 Copy.mp3']);
+	game.load.audio('e000',['assets/sounds/e000 Copy.mp3']);
+	game.load.audio('e1',['assets/sounds/e1.mp3']);
+	game.load.audio('e2',['assets/sounds/e2 Copy.mp3']);
+	game.load.audio('f0',['assets/sounds/f0 Copy.mp3']);
+	game.load.audio('f1',['assets/sounds/f1_done.mp3']);
+	game.load.audio('f2',['assets/sounds/f2 Copy.mp3']);
+	game.load.audio('f4',['assets/sounds/f4 Copy.mp3']);
+	game.load.audio('f5',['assets/sounds/f5 Copy.mp3']);
+	game.load.audio('f6',['assets/sounds/f6 Copy.mp3']);
+	game.load.audio('f7',['assets/sounds/f7 Copy.mp3']);
+	game.load.audio('f8',['assets/sounds/f9 Copy.mp3']);
+	game.load.audio('f9',['assets/sounds/f999 Copy.mp3']);
+	game.load.audio('g0',['assets/sounds/g0 Copy.mp3']);
+	game.load.audio('g00',['assets/sounds/g00 Copy.mp3']);
+	game.load.audio('g1',['assets/sounds/g1_done.mp3']);
+	game.load.audio('g2',['assets/sounds/g2 Copy.mp3']);
+	game.load.audio('g4',['assets/sounds/g4 Copy.mp3']);
+	game.load.audio('g5',['assets/sounds/g5 Copy.mp3']);
+	game.load.audio('g6',['assets/sounds/g6 Copy.mp3']);
+	game.load.audio('g7',['assets/sounds/g7 Copy.mp3']);
+
 	//-----------IMAGES-----------//
 	//********NEED TO CHANGE THE NAMES OF THESE CUZ THEY CONFUSING
 	game.load.image( 'title', 'assets/images/titleScreen.png' );
@@ -253,6 +580,18 @@ function preload() {
 	game.load.image( 'monsterTemp', 'assets/images/monster.png');
 	game.load.image( 'nothing', 'assets/images/nothing.png');
 	game.load.image( 'SEstep', 'assets/images/steps.png');
+	game.load.image( 'Rock1', 'assets/images/Rock1.png');
+	game.load.image( 'Rock2', 'assets/images/Rock2.png');
+	game.load.image( 'Rock3', 'assets/images/Rock3.png');
+	game.load.image ('Water1', 'assets/images/Water1.png');
+	game.load.image ('Water2', 'assets/images/Water2.png');
+	game.load.image ('Water3', 'assets/images/Water3.png');
+	game.load.image ('Snow1', 'assets/images/Snow1.png');
+	game.load.image ('Snow2', 'assets/images/Snow2.png');
+	game.load.image ('Snow3', 'assets/images/Snow3.png');
+	game.load.image ('Tree1', 'assets/images/Tree1.png');
+	game.load.image ('Tree2', 'assets/images/Tree2.png');
+	game.load.image ('artifact1', 'assets/images/artifact1.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
@@ -273,7 +612,13 @@ function preload() {
 function render(){
 	obstacleGroup.forEach(function (tile){
 		game.debug.body(tile, 'rgba(255,0,0,1)', false);
-	})
+	});
+	// debugGroup.forEach(function (tile){
+	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
+	// });
+	// borderGroup.forEach(function (tile){
+	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
+	// });
 }
 //========CREATE()========//
 
@@ -300,6 +645,8 @@ function create() {
 	foodGroup = game.add.group();
 	//UIGROUP is...
 	uiGroup = game.add.group();
+	//DEBUGGROUP is...
+	debugGroup = game.add.group();
 
 	//------TITLESCREEN-IN-CREATE------//
 	// "If game hasn't started yet then display the titleScreen sprite"
@@ -387,7 +734,7 @@ function update() {
 			title.destroy();
 			// game begins
 			start = true;
-			narrate('start');
+			narrate('a0');
 		}, this );
 		// "if game has begun then..."
 	} else {
@@ -987,6 +1334,7 @@ function inputDown(key){
 	} else {
 		if (key === space){
 			digging = true;
+			narrate('a1')
 		}
 		// shift adds 1 to the hideCounter
 		if (key === shift){
@@ -1142,8 +1490,7 @@ function spawnTiles() {
 }
 
 function spawnBiome(){
-	let happen = true;
-	// mapBiom();
+// mapBiom();
 // 	for ( let i = 0; i < worldMap.length; i ++) {
 // 		for ( let j = 0; j < worldMap[i].length; j ++ ) {
 // 			if (worldMap[i][j] === 'w'){
@@ -1163,63 +1510,84 @@ function spawnBiome(){
 // 		}
 // 	}
 // }
-	for ( let i = 0; i < worldSize; i += 70 ) {
-		for ( let j = 0; j < worldSize; j += 70 ) {
-			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
-				//don't spawn anything here
-			} else {
-				if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
-					//don't spawn anything here either
-				} else {
-					let rnd = rndNum(40);
-					if (rnd == 4){
-						if (specialLakeEvent == true){
-							if (i >= 1400 && j <= 1400 && i <= 1500 && j >= 1000){
-								console.log("Adding a lake")
-						for ( let g = 0; g < specialLake.length; g ++) {
-								for ( let h = 0; h < specialLake[g].length; h ++ ) {
-									if (specialLake[g][h] === 'w'){
-										water = game.add.isoSprite( (i + g*TILESIZE)/2, (j + h*TILESIZE)/2, 0, 'water', 0, obstacleGroup);
-										water.anchor.setTo( anchorPoint, 0 );
-										game.physics.isoArcade.enable( water );
-										water.body.collideWorldBounds = true;
-										water.body.immovable = true;
-									}
-									if (specialLake[g][h] === 'r'){
-										rock = game.add.isoSprite( (i + g*TILESIZE)/2, (j + h*TILESIZE)/2, 0, 'rock', 0, obstacleGroup );
-										rock.anchor.setTo( anchorPoint, 0 );
-										game.physics.isoArcade.enable( rock );
-										rock.body.collideWorldBounds = true;
-										rock.body.immovable = true;
-									}
-									specialLakeEvent = false;
-								}
+for ( let i = 0; i < worldSize; i += 70 ) {
+	for ( let j = 0; j < worldSize; j += 70 ) {
+		let rnd = rndNum(40);
+		if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
+			//don't spawn anything here
+		} else if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
+			//don't spawn anything here either
+		} else if ((i <= 1050) && (j <= 1050)){
+			if (specialLakeEvent == true){
+				for ( let g = 0; g < specialLake.length; g ++) {
+						for ( let h = 0; h < specialLake[g].length; h ++ ) {
+							if (specialLake[g][h] === 'w'){
+								water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water1', 0, obstacleGroup);
+								water.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( water );
+								water.body.collideWorldBounds = true;
+								water.body.immovable = true;
+							}
+							if (specialLake[g][h] === 'b'){
+								water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water3', 0, obstacleGroup);
+								water.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( water );
+								water.body.collideWorldBounds = true;
+								water.body.immovable = true;
+							}
+							if (specialLake[g][h] === 'L'){
+								rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow2', 0, eventGroup );
+								rock.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( rock );
+								rock.body.collideWorldBounds = true;
+								rock.body.immovable = true;
+							}
+							if (specialLake[g][h] === 'Li'){
+								artifact1 = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'artifact1', 0, obstacleGroup );
+								artifact1.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( artifact1 );
+								artifact1.body.collideWorldBounds = true;
+								rock = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow3', 0, isoGroup );
+								rock.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( rock );
+								rock.body.collideWorldBounds = true;
+								rock.body.immovable = true;
+							}
+							if (specialLake[g][h] === 'r'){
+								rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Rock2', 0, obstacleGroup );
+								rock.anchor.setTo( anchorPoint, 0 );
+								game.physics.isoArcade.enable( rock );
+								rock.body.collideWorldBounds = true;
+								rock.body.immovable = true;
 							}
 						}
-						}
 					}
-						if (i >= 1400 && j <= 1400 && i <= 1500 && j >= 1000){
-
-						} else {
-						if ( rnd == 1 ) {
-						water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-						water.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( water );
-						water.body.collideWorldBounds = true;
-						water.body.immovable = true;
-					} else if (rnd == 2){
-						rock = game.add.isoSprite( i, j, 0, 'rock', 0, obstacleGroup );
-						rock.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( rock );
-						rock.body.collideWorldBounds = true;
-						rock.body.immovable = true;
-					} else if (rnd == 3){
-						dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
-						dig.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( dig );
-						dig.body.collideWorldBounds = true;
-					}
+				specialLakeEvent = false;
 				}
+			} else {
+				if ( rnd == 1 ) {
+					water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
+					water.anchor.setTo( anchorPoint, 0 );
+					game.physics.isoArcade.enable( water );
+					water.body.collideWorldBounds = true;
+					water.body.immovable = true;
+				} else if (rnd == 2){
+					rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
+					rock.anchor.setTo( anchorPoint, 0 );
+					game.physics.isoArcade.enable( rock );
+					rock.body.collideWorldBounds = true;
+					rock.body.immovable = true;
+				} else if (rnd == 3){
+					dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
+					dig.anchor.setTo( anchorPoint, 0 );
+					game.physics.isoArcade.enable( dig );
+					dig.body.collideWorldBounds = true;
+				} else if (rnd == 4){
+					rock = game.add.isoSprite( i, j, 0, 'Rock2', 0, obstacleGroup );
+					rock.anchor.setTo( anchorPoint, 0 );
+					game.physics.isoArcade.enable( rock );
+					rock.body.collideWorldBounds = true;
+					rock.body.immovable = true;
 				}
 			}
 		}
