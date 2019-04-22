@@ -11,122 +11,6 @@ guides you as you explore documenting your story, obey, reject, or toy with him 
 The important part is to have fun.
 
 ******************/
-//========VARIABLES========//
-//The MISC variables used in the game
-let emitter;
-let title;
-let titleButton;
-let player;
-let fullHungerBar;
-let emptyHungerBar;
-let chanceFood = false;
-let food;
-let justAte = false;
-let bloodSplatter;
-
-//Player movement speed
-let speed;
-let playerHiding = false;
-let playerKilled = false;
-let hidden = false;
-let obscureFilter;
-let dangerFilter;
-
-//=========MONSTER=======//
-let monster;
-let monsterSpeed = 200;
-let monsterDistance;
-let monsterRnd;
-let returningMonster = false;
-let chase = false;
-let blocked = false;
-let monsterSpawned = false;
-let monsterComing = false;
-let monsterPlaced = false;
-
-
-//=========KEYBOARD=======//
-let up;
-let left;
-let right;
-let down;
-let space;
-let shift;
-
-//==SOUNDS-&-MUSIC==// Soundtrack taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
-let soundTrack;
-let foodSound1;
-let foodSound2;
-
-//=======TILES==========//
-let respawnTile;
-let neutralTile;
-let borderTile;
-let tile;
-let newTile;
-let dig;
-let nonDig;
-let wrapRnd;
-let newGround;
-let specialLakeEvent = true;
-let specialLake = [
-	['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-	['w','b','b','b','b','b','b','b','b','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','b','L','b','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
-	['w','b','b','b','L','L','L','r','L','L','L','b','b','b','w'],
-	['w','b','b','L','L','L','L','Li','L','L','L','L','b','b','w'],
-	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
-	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','b','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','b','b','b','b','b','b','w'],
-	['w','w','w','w','w','w','L','L','w','w','w','w','w','w','w']
-]
-let uniqueBiome1 = [
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','','']
-]
-let uniqueBiome2 = [
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','',''],
-	['','','','','','','','','','']
-]
-let uniqueBiome3 = []
-let specialBoulderEvent = true;
-let specialFrozenHare = true;
-let specialDig1 = true;
-let specialDig2 = true;
-
-let artifact1;
-
-//=======SCROLLING=====//
-let distanceSignal = new Phaser.Signal();
-
-
-//======OBSTACLES=====//
-let rock;
-let water;
-let nonTile;
-
 //========GROUPS========//
 //The different groups which hold different objects and ties them through common properties
 let centerGroup;
@@ -140,30 +24,63 @@ let stepGroup;
 let debugGroup;
 let collectGroup;
 
-//========CONTROLS=======//
-//Variables used for controlling the player character
-let Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
-//========STEPS==========//
-let walkingSE = false;
-let SEstep;
+//========CONSTANTS========//
+//The constant variables used in game can be editted here
+//Camera scale controller
+let zoom = 1.3;
+//WorldSize controls the Isometric arrays used for generating the game world
+//example: for ( let i = 0; i < worldSize; i += xxx );
+let worldSize = 3800;
+//CenterMap is the absolute center of the map;
+let centerMap = 1900;
+//Start is used for the Title screen if false = display Title titleScreen, if true = give player control
+let start = false;
+//the Typical achorPoint for everything
+//0.5 means center of image
+let anchorPoint = 0.5
+//Player regular speed
+let regularSpeed = 100;
+//Player faster speed
+let fasterSpeed = 150;
+//Is it snowing?
+let snowing = true;
+const TILESIZE = 70;
+//number of key strokes until monster
+let keysToMonster = 50;
+//=======HUNGER-CONSTANTS=========//
+//Hunger meter
+let hungerMeter
+//Hunger rate how much you loose per 30 seconds
+let hungerRate = 10;
+//Hungermax
+let hungerMax = 200;
+//How much food replenishes
+let nutrition = 60;
 
-//Digging is used to check if the player has infact pressed space to dig, default is false
-let digging = false;
-//shiftDown tracks the up or down of the shift key
-let shiftDown = false;
-//hideCounter is the counter which tracks how many times the player has pressed shift
-let hideCounter = 0;
-let keyCounter = 0;
+//========GAME-VARIABLES========//
+//The miscelanous variables used in the game
+let title;
+let emitter;
 
-let worldMap;
+//========FOOD-VARIABLES========//
+//These variables are used by the food functions
+let chanceFood = false;
+let justAte = false;
+let fullHungerBar;
+let emptyHungerBar;
+let food;
+let acornSound = false;
+let potatoSound = false;
+let carrotSound = false;
 
-let rocker;
-//========NARRATOR=========//
-let narratorState;
+//========NARRATOR-VARIABLES========//
+let narratorSilence = false;
+let narratorState = 0;
+let dangerState = 0;
 let subtitle;
 let subtitles = {
 	a0: {
-		subtitle: "In the depths of a land far away the snow falls quietly, nothing disturbs the tranquility.... except... for you caught in the snow-drift.",
+		subtitle: "In the depths of a land far away the snow falls quietly nothing disturbs the tranquility.... except... for you caught in the snow-drift.",
 		sound:  'a0'
 	},
 	a1: {
@@ -175,7 +92,7 @@ let subtitles = {
 		sound:  'a2'
 	},
 	a3: {
-		subtitle: "The hare moved around to get a accustomed to this strange new place, he hoped & hoped leaving little paw prints as he went",
+		subtitle: "The hare moved around to get a accustomed to this strange new place",
 		sound:  'a3'
 	},
 	a4: {
@@ -427,50 +344,130 @@ let subtitles = {
 		sound:  'g7'
 	}
 }
+let interuptNar = false;
+let currentSound;
+let standingStill = false;
+let activeSub = [];
 
-//========CONSTANTS========//
-//The constant variables used in game can be editted here
+//========PLAYER-VARIABLES========//
+//Player variables including
+let player;
+let speed;
+let playerHiding = false;
+let playerKilled = false;
+let hidden = false;
+let digging = false;
+let obscureFilter;
+let dangerFilter;
+let bloodSplatter;
 
-//Camera scale controller
-let zoom = 1.3;
+//=========MONSTER-VARIABLES=======//
+let monster;
+let monsterSpeed = 200;
+let monsterDistance;
+let monsterRnd;
+let returningMonster = false;
+let chase = false;
+let blocked = false;
+let monsterSpawned = false;
+let monsterComing = false;
+let monsterPlaced = false;
+let monsterSound = 0;
 
-//WorldSize controls the Isometric arrays used for generating the game world
-//example: for ( let i = 0; i < worldSize; i += xxx );
-let worldSize = 3800;
+//=========KEYBOARD=======//
+let up;
+let left;
+let right;
+let down;
+let space;
+let shift;
+let hideCounter = 0;
+let keyCounter = 0;
 
-//CenterMap is the absolute center of the map;
-let centerMap = 1900;
+//==SOUNDS-&-MUSIC==// Soundtrack taken from: https://www.youtube.com/watch?v=Elo8-CuGJTo
+let soundTrack;
+let foodSound1;
+let foodSound2;
+let monsterSkreech;
+let crunch;
+let crackle;
 
-//Start is used for the Title screen if false = display Title titleScreen, if true = give player control
-let start = false;
+//=======TILES==========//
+let respawnTile;
+let neutralTile;
+let borderTile;
+let tile;
+let newTile;
+let dig;
+let nonDig;
+let wrapRnd;
+let newGround;
+let rock;
+let water;
+let nonTile;
+let worldMap;
 
-//the Typical achorPoint for everything
-//0.5 means center of image
-let anchorPoint = 0.5
 
-//Player regular speed
-let regularSpeed = 100;
+//======SPECIAL-WORLDSTUFF======//
+let specialLakeEvent = true;
+let specialLake = [
+	['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
+	['w','b','b','b','b','b','b','b','b','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','b','L','b','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
+	['w','b','b','b','L','L','L','r','L','L','L','b','b','b','w'],
+	['w','b','b','L','L','L','L','Li','L','L','L','L','b','b','w'],
+	['w','b','b','b','L','L','L','L','L','L','L','b','b','b','w'],
+	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','b','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
+	['w','b','b','b','b','b','L','L','b','b','b','b','b','b','w'],
+	['w','w','w','w','w','w','L','L','w','w','w','w','w','w','w']
+]
+let uniqueBiome1 = [
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','','']
+]
+let uniqueBiome2 = [
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','',''],
+	['','','','','','','','','','']
+]
+let uniqueBiome3 = []
+let specialBoulderEvent = true;
+let specialFrozenHare = true;
+let specialDig1 = true;
+let specialDig2 = true;
+let artifact1;
 
-//Player faster speed
-let fasterSpeed = 150;
+//=======SCROLLING=====//
+//This is the signal sent went the player wraps to reload the map
+let distanceSignal = new Phaser.Signal();
 
-//Is it snowing?
-let snowing = true;
+//========CONTROLS=======//
+//Variables used for controlling the player character
+let Ndown = false, Sdown = false, Edown = false, Wdown = false, SEdown = false, NEdown = false, SWdown = false, NWdown = false;
+//shiftDown tracks the up or down of the shift key
+let shiftDown = false;
 
-const TILESIZE = 70;
-
-//number of key strokes until monster
-let keysToMonster = 50;
-
-//=======HUNGER-CONSTANTS=========//
-//Hunger meter
-let hungerMeter
-//Hunger rate how much you loose per 30 seconds
-let hungerRate = 10;
-//Hungermax
-let hungerMax = 200;
-//How much food replenishes
-let nutrition = 60;
 //=========DEVELOPER=============//
 // let chaseCounter = 0;
 // let developerMode = true;
@@ -483,7 +480,7 @@ let nutrition = 60;
 //declare width,height & functions -- this is our main Object
 let game = new Phaser.Game( window.width, window.height, Phaser.AUTO, '', {
 	preload: preload,
-	render: render,
+	// render: render,
 	create: create,
 	update: update
 } );
@@ -497,6 +494,9 @@ function preload() {
 	game.load.audio('music',['assets/sounds/PeacefulPiano.mp3']);
 	game.load.audio('foodsound1',['assets/sounds/foodSound.mp3']);
 	game.load.audio('foodsound2',['assets/sounds/anotherFoodSound.mp3']);
+	game.load.audio('playerDies',['assets/sounds/monsterCrunch.mp3']);
+	game.load.audio('monsterCrackle',['assets/sounds/monsterCrack.mp3']);
+	game.load.audio('monsterSkreech',['assets/sounds/monsterSkreech.mp3']);
 
 	//-----------NARRATION-----------//
 	game.load.audio('a0',['assets/sounds/a0 Copy.mp3']);
@@ -614,19 +614,20 @@ function preload() {
 	game.iso.anchor.setTo( anchorPoint, 0 );
 }
 
-function render(){
-	obstacleGroup.forEach(function (tile){
-		game.debug.body(tile, 'rgba(255,0,0,1)', false);
-	});
-	// debugGroup.forEach(function (tile){
-	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
-	// });
-	// borderGroup.forEach(function (tile){
-	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
-	// });
-}
+// function render(){
+// 	obstacleGroup.forEach(function (tile){
+// 		game.debug.body(tile, 'rgba(255,0,0,1)', false);
+// 	});
+// 	// debugGroup.forEach(function (tile){
+// 	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
+// 	// });
+// 	// borderGroup.forEach(function (tile){
+// 	// 	game.debug.body(tile, 'rgba(255,0,0,1)', false);
+// 	// });
+// }
 //========CREATE()========//
 
+//========CREATE()========//
 function create() {
 	game.stage.backgroundColor = "#ffffff";
 	// Set the global gravity for IsoArcade.
@@ -712,6 +713,10 @@ function create() {
 	soundTrack = game.add.audio('music');
 	foodSound1 = game.add.audio('foodsound1');
 	foodSound2 = game.add.audio('foodsound2');
+	monsterSkreech = game.add.audio('monsterSkreech');
+	crunch = game.add.audio('playerDies');
+	crackle = game.add.audio('monsterCrack');
+
 	//set music looping to true
 	soundTrack.loop = true;
 	//play after a half second (this is to avoid having to click on the screen so it can play on title screen)
@@ -722,24 +727,43 @@ function create() {
 }
 
 //========UPDATE()========//
-
-function narrate(key) {
-	subtitle.text = subtitles[key].subtitle;
-	game.sound.play(subtitles[key].sound);
-
-}
-
 function update() {
 	//-----TITLESCREEN-----//
 	// "if game hasn't begun then when the player clicks anywhere on the title sprite begin game"
 	if ( start === false ) {
+		if (narratorState === 0){
+			narrate('a0');
+			game.time.events.add(Phaser.Timer.SECOND*60, function(){
+				if ( start === false ) {
+					narrate('b0');
+				}
+			}, this);
+			game.time.events.add(Phaser.Timer.SECOND*120, function(){
+				if ( start === false ) {
+					narrate('b00');
+				}
+			}, this);
+			game.time.events.add(Phaser.Timer.SECOND*180, function(){
+				if ( start === false ) {
+					narrate('b000');
+				}
+			}, this);
+			game.time.events.add(Phaser.Timer.SECOND*270, function(){
+				if ( start === false ) {
+					narrate('b0000');
+					narratorSilence = true;
+				}
+			}, this);
+			narratorState = 1;
+		}
 		//	titlescreen event if clicked
 		title.events.onInputDown.add( function() {
+			interuptNarrator();
 			// delete titleScreen so it doesn't remain on screen
 			title.destroy();
 			// game begins
 			start = true;
-			narrate('a0');
+			narrate('a1')
 		}, this );
 		// "if game has begun then..."
 	} else {
@@ -777,10 +801,9 @@ function update() {
 
 }
 
-//=======VARIOUS-FUNCTIONS=========//
+//=======MISCELANOUS-FUNCTIONS=========//
 // Here you will find the various functions called in our code
 // snowEmitter,initPlayer,overlapCheck,rndNum,cameraControl,manageKeys
-
 // manageKeys establishes listeners and variables attributed to the useable keys
 function manageKeys(){
 	//KEYPRESS EVENTS *******Be more descriptive
@@ -809,7 +832,6 @@ function manageKeys(){
 	shift.onDown.add(inputDown,this);
 	shift.onUp.add(inputUp,this);
 }
-
 // snowEmitter creates and defines the properties of the emitter
 function snowEmitter() {
 	// Add emitter to game
@@ -833,7 +855,6 @@ function snowEmitter() {
 	//start(explode, lifespan, frequency, quantity);
 	emitter.start( false, 1000, 0.5, 0 );
 }
-
 // overlapCheck is an event function which is checking if player is over the dig tile
 function overlapCheck() {
 		//"for each tile in the event group preform the following..."
@@ -841,6 +862,10 @@ function overlapCheck() {
 			//"check for overlap between the tile passed in the function above & the player & if they overlap perform..."
 			game.physics.isoArcade.overlap( dig, player, function( holeTile, player ) {
 				// if player is digging for food
+				if (narratorState === 2){
+					narrate('a6')
+					narratorState = 3;
+				}
 				if (holeTile.key == 'dig'){
 					if ( digging == true ) {
 						// replace the texture of the tile with a new texture
@@ -860,7 +885,6 @@ function overlapCheck() {
 		});
 	});
 }
-
 // camera Control (pretty clear what this does)
 function cameraControl() {
 	// Make the camera follow the player.
@@ -869,57 +893,53 @@ function cameraControl() {
 	game.camera.scale.x = zoom;
 	game.camera.scale.y = zoom;
 }
-
 // simple random number function pulls a number from the range its given
 function rndNum( num ) {
 	return Math.floor( Math.random() * num );
 }
 
-// newTiles is the function responsible for changing the biome when you wrap
-function newTiles(){
-	obstacleGroup.forEach(function(tile){
-		if (tile.key == 'playerAnim' || tile.key == 'monsterAnim'){
-			console.log('dont fuck with me')
-		} else {
-			tile.destroy();
-		}
-	});
-	eventGroup.forEach(function(tile){
-		tile.destroy();
-	});
-	spawnBiome();
-}
-
-//****************FUNCTIONS TBA***********************//
-
+//=======FOOD-FUNCTIONS=========//
 function initHunger(){
-	hungerMeter = 200;
+	hungerMeter = 100;
 	fullHungerBar = game.add.sprite(730,20,'fullStomach', uiGroup );
 	fullHungerBar.anchor.setTo( anchorPoint, 0 );
 	emptyHungerBar = game.add.sprite(730,20,'starving', uiGroup );
 	emptyHungerBar.anchor.setTo( anchorPoint, 0 );
-    fullHungerBar.fixedToCamera = true;
 	emptyHungerBar.alpha = 0;
+	fullHungerBar.alpha = 0;
+    fullHungerBar.fixedToCamera = true;
 	emptyHungerBar.fixedToCamera = true;
 	//Every 10 seconds change the alpha and update hungerMeter
-	game.time.events.loop(Phaser.Timer.SECOND*10, function(){
-		if (hungerMeter > 0) {
-			if (justAte == false){
-				if (hidden == true){
-					hungerMeter -= hungerRate*2
-				} else {
-					hungerMeter -= hungerRate
+	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
+		if (narratorState >= 2){
+			if (hungerMeter > 0) {
+				if (narratorState >=4){
+					if (hungerMeter === 150){
+						narrate('e1');
+					}
+					if (hungerMeter === 100){
+						narrate('e2');
+					}
+				};
+				if (justAte == false){
+					if (hidden == true){
+						hungerMeter -= hungerRate*2
+					} else {
+						hungerMeter -= hungerRate
+					}
+				};
+				fullHungerBar.alpha = hungerMeter/200
+				emptyHungerBar.alpha = (1 - (hungerMeter/200));
+			} else {
+				emptyHungerBar.alpha = 1;
+				console.log('yea youre dead')
+				if (narratorState === 5){
+					narrate('d0');
 				}
 			}
-			fullHungerBar.alpha = hungerMeter/200
-			emptyHungerBar.alpha = (1 - (hungerMeter/200));
-		} else {
-			emptyHungerBar.alpha = 1;
-			console.log('yea youre dead')
 		}
 	}, this);
 }
-
 function foodHungerManager(){
 	if (chanceFood == true){
 		let rnd = rndNum(100)
@@ -928,22 +948,53 @@ function foodHungerManager(){
 			food.body.y = player.body.y;
 			food.alpha = 1;
 		}
+		if (rnd >= 25 && rnd < 97){
+			if (narratorState === 3){
+				narrate('b3');
+				narratorState = 4;
+			}
+			if (narratorState = 4){
+				narrate('e0')
+				narratorState = 5;
+			}
+		}
 		if (rnd < 25){
 			food.animations.play('puff');
 		} else if (rnd >= 25 && rnd < 50){
 			//You get an acorn, acorn animation, + 15 hungerMeter
 			food.animations.play('acorn');
 			foodSound1.play();
+			if (narratorState >= 5){
+				if (acornSound === false){
+					interuptNarrator();
+					narratorManager('e000')
+					acornSound = true
+				}
+			}
 			hungerMeter += nutrition/4;
 		} else if (rnd >= 50 && rnd < 75){
 			//You get a potato, potato animation, + 30 hungerMeter
 			food.animations.play('potato');
 			foodSound2.play();
+			if (narratorState >= 5){
+				if (potatoSound === false){
+					interuptNarrator();
+					// narrate('e0000');
+					potatoSound = true;
+				}
+			}
 			hungerMeter += nutrition/2;
 		} else if (rnd >= 75 && rnd < 97){
 			//You get a Carrot, carrot animation, + 60 hungerMeter
 			food.animations.play('carrot');
 			foodSound1.play();
+			if (narratorState >= 5){
+				if (carrotSound === false){
+					interuptNarrator();
+					// narrate('e00000');
+					carrotSound = true;
+				}
+			}
 			hungerMeter += nutrition;
 		} else if (rnd == 97 || rnd == 98){
 			//artifact 1 animation here
@@ -975,19 +1026,6 @@ function foodHungerManager(){
 		speed = regularSpeed;
 	}
 }
-
-function initFilters(){
-	obscureFilter = game.add.sprite( game.camera.x-55, game.camera.y-40, 'obscure' );
-	obscureFilter.fixedToCamera = true;
-	obscureFilter.scale.setTo(0.4,0.4);
-	obscureFilter.alpha = 0;
-
-	dangerFilter = game.add.sprite( game.camera.x-55, game.camera.y-40, 'danger' );
-	dangerFilter.fixedToCamera = true;
-	dangerFilter.scale.setTo(0.4,0.4);
-	dangerFilter.alpha = 0;
-}
-
 function initFood(){
 	food = game.add.isoSprite( 1900, 1900, 0, 'foodAnim', 0, foodGroup);
 
@@ -1016,20 +1054,76 @@ function initFood(){
 	food.alpha = 0;
 }
 
-// function steps(){}
-
+//=======NARRATOR-FUNCTIONS=========//
+function narrate(key) {
+	if (narratorSilence === false){
+		subtitle.text = subtitles[key].subtitle;
+		currentSound = game.add.audio(subtitles[key].sound);
+		console.log(game.sound)
+		currentSound.play();
+		currentSound.onStop.add(narratorManager,this);
+	}
+}
+function narratorManager(sound){
+	if (sound.key === 'a1'){
+		narrate('a2')
+	}
+	if (sound.key === 'a2'){
+		narrate('a3')
+	}
+	if (sound.key === 'a3'){
+		if(keyCounter === 0){
+			narrate('b2')
+		} else {
+			narrate('a4')
+		}
+	}
+	if (sound.key === 'a4'){
+		narrate('a5')
+		narratorState = 2;
+	}
+	if (sound.key === 'b3'){
+		narrate('e0')
+		narratorState = 5;
+	}
+	if (sound.key === 'a6'){
+		game.time.events.add(Phaser.Timer.SECOND*3, function(){
+			narrate('a7')
+			narratorState = 4
+		}, this);
+	}
+	if (sound.key === 'e0'){
+		narrate('a8')
+	}
+	if (sound.key === 'a8'){
+		game.time.events.add(Phaser.Timer.SECOND*30, function(){
+			if (narratorState === 5){
+				narrate('b4');
+			} else {
+				narrate('a9')
+			}
+		}, this);
+	}
+	if (sound.key === 'd1'){
+		game.time.events.add(Phaser.Timer.SECOND*5, function(){
+			narrate('d2')
+		}, this);
+	}
+	if (sound === 'e000'){
+		narrate('e000');
+	}
+}
 function createSubtitles(){
-	let style = { font: "65px Arial", fill: "#ff0044", align: "center" };
-	subtitle = game.add.text(game.camera.centerX-300, 0, 'crunchy', style);
+	let style = { font: "18px Arial", fill: "#000000", align: "center", wordWrap: true, wordWrapWidth: 600};
+	subtitle = game.add.text(game.camera.x+20, game.camera.y+450, 'crunchy', style);
 	subtitle.fixedToCamera= true;
+	game.sound.setDecodedCallback([ currentSound ], start, this);
+}
+function interuptNarrator(){
+	currentSound.stop();
 }
 
-
-//initArtifacts
-//function initArtifacts(){}
-
-//function artifactsManager(){}
-
+//=======MONSTER-FUNCTIONS=========//
 function monsterManager(){
 
 	if (keyCounter >= keysToMonster){
@@ -1041,6 +1135,22 @@ function monsterManager(){
 			dangerFilter.alpha += 0.01;
 		} else {
 			dangerFilter.alpha -= 0.05;
+		}
+		if (dangerState === 0){
+			interuptNarrator();
+			narrate('d1')
+		} else if (dangerState === 2 ){
+			narrate('d5')
+			dangerState = 3
+		} else if (dangerState === 3 ){
+			narrate('d6')
+			dangerState = 4
+		} else if (dangerState === 4){
+			narrate('d7')
+			dangerState = 5
+		} else if (dangerState === 5){
+			narrate('d8')
+			dangerState = 6
 		}
 	} else {
 		if (dangerFilter.alpha > 0) {
@@ -1056,9 +1166,12 @@ function monsterManager(){
 
 	if (monsterSpawned === true){
 		monster.animations.play('active');
+		if (monsterSound == 0){
+			monsterSkreech.play();
+			monsterSound = 1;
+		}
 	}
 }
-
 function initMonster(){
 	monster = game.add.isoSprite( 0, 0, 0, 'monsterAnim', 0, obstacleGroup);
 	//monster animations will go here
@@ -1082,6 +1195,15 @@ function initMonster(){
 		if (monsterSpawned == true){
 			game.time.events.add(Phaser.Timer.SECOND*90, function(){
 				monsterSpawned = false;
+				monsterSound = 0;
+				if (narratorState === 6){
+					if (dangeState === 2){
+						narrate('a11');
+					} else {
+						narrate('a10')
+						narratorState = 7;
+					}
+				}
 			}, this);
 		}
 	}, this);
@@ -1091,7 +1213,6 @@ function initMonster(){
 	//collide with the floor of the world/don't fall into oblivion
 	monster.body.collideWorldBounds = true;
 }
-
 function monsterAI(){
 	if (monsterSpawned == true){
 		if (monsterPlaced == false){
@@ -1226,7 +1347,6 @@ function monsterAI(){
 	   monster.body.y = 0;
    }
 }
-
 function monsterSwitch(){
 	console.log('monster mash')
 	monsterRnd ++;
@@ -1234,9 +1354,6 @@ function monsterSwitch(){
 		blocked = true;
 	}
 }
-
-//function endingScene(){}
-
 
 //========PLAYER-FUNCTIONS=========//
 //*****COMMENTS NEEDED HERE
@@ -1256,26 +1373,12 @@ function initPlayer() {
 	player.animations.add('SE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
 	player.animations.add('HIDE', [64, 65, 66, 67, 68, 69, 70, 71], 10, false);
 
-
-	// SEstep = game.add.isoSprite(0, 0, 0, 'SEstep', 0, stepGroup);
-	// SEstep.anchor.setTo (anchorPoint);
-	//
-	// game.time.events.loop(Phaser.Timer.SECOND, function(){
-	// 	if (walkingSE == true){
-	// 	SEstep = game.add.isoSprite(player.body.x, player.body.y, 0, 'SEstep', 0, stepGroup);
-	// 	SEstep.anchor.setTo (anchorPoint);
-	// 		game.time.events.loop(Phaser.Timer.SECOND, function(){
-	// 			SEstep.alpha = 0;
-	// 		})
-	// 	}
-	// });
 	player.anchor.setTo( anchorPoint );
 	//enable physics on the player
 	game.physics.isoArcade.enable( player );
 	//collide with the floor of the world/don't fall into oblivion
 	player.body.collideWorldBounds = true;
 }
-
 function actionPlayer(){
 	if (digging == true ) {
 		player.body.velocity.x = 0;
@@ -1333,20 +1436,30 @@ function actionPlayer(){
 	   }
    }
 }
-
 function inputDown(key){
 	// digging mechanic: if space is pressed then player is digging
 	// *****Must add animation for digging
+	if (narratorState === 5){
+		if (key === shift || key === up || key === down || key === left || key === right){
+			narratorState = 6;
+		}
+	}
 	keyCounter ++;
 	if (playerHiding == true){
 		if (key === shift || key === up || key === down || key === left || key === right){
-			console.log(hidden);
 			hidden = false
+			if (dangerState === 1){
+				narrate('d00')
+			}
+			if (dangerState === 2){
+				narrate('d000')
+			}
 		}
 	} else {
 		if (key === space){
 			digging = true;
-			narrate('a1')
+			console.log(currentSound)
+			currentSound.stop();
 		}
 		// shift adds 1 to the hideCounter
 		if (key === shift){
@@ -1366,7 +1479,6 @@ function inputDown(key){
 		}
 		if (key === right){
 			SEdown = true;
-			walkingSE = true;
 		}
 		if (NWdown == true && NEdown == true ){
 			NEdown = false;
@@ -1390,7 +1502,6 @@ function inputDown(key){
 		}
 	}
 }
-
 function inputUp(key){
 	Ndown = false;
 	Edown = false;
@@ -1400,7 +1511,6 @@ function inputUp(key){
 	NEdown = false;
 	SWdown = false;
 	NWdown = false;
-	walkingSE = false;
 	if( key === space){
 	digging = false;
 	}
@@ -1408,7 +1518,6 @@ function inputUp(key){
 	shiftDown = false;
 	}
 }
-
 function playerAnim(){
 	 if (SEdown == true){
 	        player.animations.play('SE');
@@ -1428,6 +1537,9 @@ function playerAnim(){
 			player.animations.play('N');
 	} else if (playerHiding == true){
 			player.animations.play('HIDE');
+			if (dangerState === 0){
+				dangerState = 1;
+			}
 			if (obscureFilter.alpha < 1){
 			obscureFilter.alpha += 0.01;
 			}
@@ -1450,6 +1562,10 @@ function playerAnim(){
 	}
 	if (monsterDistance < 60){
 		returningMonster = false;
+		if (dangerState === 1){
+			narrate('d4')
+			dangerState = 2;
+		}
 	}
 	if (monsterDistance < 35){
 		//hidden might/should be playerHiding
@@ -1459,18 +1575,47 @@ function playerAnim(){
 			bloodSplatter.anchor.setTo( anchorPoint, 0 );
 			game.physics.isoArcade.enable( bloodSplatter );
 			bloodSplatter.body.collideWorldBounds = true;
+			crunch.play();
 			player.kill();
 			playerKilled = true;
 			hidden = true;
 			chase = false;
+			if (dangerState === 0){
+				narrate('b5')
+			}
 		}
 	}
+}
+function initFilters(){
+	obscureFilter = game.add.sprite( game.camera.x-55, game.camera.y-40, 'obscure' );
+	obscureFilter.fixedToCamera = true;
+	obscureFilter.scale.setTo(0.4,0.4);
+	obscureFilter.alpha = 0;
+
+	dangerFilter = game.add.sprite( game.camera.x-55, game.camera.y-40, 'danger' );
+	dangerFilter.fixedToCamera = true;
+	dangerFilter.scale.setTo(0.4,0.4);
+	dangerFilter.alpha = 0;
 }
 
 //=========WORLD-MAKING-FUNCTIONS============//
 // In this section is located all the functions called in Create() which make the isometric landscape
 // & generates the objects, player, food, water ect...
 // ***TILES ARE STACKING ONTO EACH OTHER FIX DIS?
+// newTiles is the function responsible for changing the biome when you wrap
+function newTiles(){
+	obstacleGroup.forEach(function(tile){
+		if (tile.key == 'playerAnim' || tile.key == 'monsterAnim'){
+			console.log('dont fuck with me')
+		} else {
+			tile.destroy();
+		}
+	});
+	eventGroup.forEach(function(tile){
+		tile.destroy();
+	});
+	spawnBiome();
+}
 function spawnTiles() {
 	// THIS IS THE TEMPLATE USED FOR PLACING EVERYTHING ELSE IN THE GAMEWORLD
 	// The basic function is this: create a loop for the X and then a loop for Y creating a isometric grid
@@ -1508,7 +1653,6 @@ function spawnTiles() {
 		}
 	}
 }
-
 function spawnBiome(){
 	// mapBiom();
 	// 	for ( let i = 0; i < worldMap.length; i ++) {
@@ -1613,7 +1757,6 @@ function spawnBiome(){
 			}
 		}
 	}
-
 function mapBiom(){
 	uniqueBiome2 = [];
 	for ( let i = 0; i < worldSize/35; i += 1 ) {
@@ -1631,7 +1774,6 @@ function mapBiom(){
 	}
 	console.log(worldMap);
 }
-
 function spawnBorder(){
 	for ( let i = 0; i < worldSize; i += 40 ) {
 		for ( let j = 0; j < worldSize; j += 40 ) {
@@ -1644,3 +1786,12 @@ function spawnBorder(){
 		}
 	}
 }
+
+
+
+//function endingScene(){}
+
+//initArtifacts
+//function initArtifacts(){}
+
+//function artifactsManager(){}
