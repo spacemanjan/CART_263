@@ -22,10 +22,12 @@ let emptyHungerBar;
 let chanceFood = false;
 let food;
 let justAte = false;
+let bloodSplatter;
 
 //Player movement speed
 let speed;
 let playerHiding = false;
+let playerKilled = false;
 let hidden = false;
 let obscureFilter;
 let dangerFilter;
@@ -36,7 +38,7 @@ let monsterSpeed = 200;
 let monsterDistance;
 let monsterRnd;
 let returningMonster = false;
-let chase = true;
+let chase = false;
 let blocked = false;
 let monsterSpawned = false;
 let monsterComing = false;
@@ -430,7 +432,7 @@ let subtitles = {
 //The constant variables used in game can be editted here
 
 //Camera scale controller
-let zoom = 1;
+let zoom = 1.3;
 
 //WorldSize controls the Isometric arrays used for generating the game world
 //example: for ( let i = 0; i < worldSize; i += xxx );
@@ -447,10 +449,10 @@ let start = false;
 let anchorPoint = 0.5
 
 //Player regular speed
-let regularSpeed = 300;
+let regularSpeed = 100;
 
 //Player faster speed
-let fasterSpeed = 350;
+let fasterSpeed = 150;
 
 //Is it snowing?
 let snowing = true;
@@ -577,7 +579,6 @@ function preload() {
 	game.load.image( 'starving', 'assets/images/badHunger.png' );
 	game.load.image( 'obscure', 'assets/images/hiddenFilter.png');
 	game.load.image( 'danger', 'assets/images/dangerFilter.png');
-	game.load.image( 'monsterTemp', 'assets/images/monster.png');
 	game.load.image( 'nothing', 'assets/images/nothing.png');
 	game.load.image( 'SEstep', 'assets/images/steps.png');
 	game.load.image( 'Rock1', 'assets/images/Rock1.png');
@@ -592,9 +593,13 @@ function preload() {
 	game.load.image ('Tree1', 'assets/images/Tree1.png');
 	game.load.image ('Tree2', 'assets/images/Tree2.png');
 	game.load.image ('artifact1', 'assets/images/artifact1.png');
+	game.load.image ('killedHare', 'assets/images/monsterDeath.png');
 
 	//-----------ANIMATIONS-----------//
-	game.load.spritesheet( 'playerAnim', 'assets/images/testingspritesheet.png', 70, 74 );
+	game.load.spritesheet( 'playerAnim', 'assets/images/PlayerMovement.png', 70, 74 );
+	game.load.spritesheet( 'playerSE', 'assets/images/playerSE.png', 70, 74 );
+	game.load.spritesheet( 'playerIdle', 'assets/images/playerIdle.png', 70, 74 );
+	game.load.spritesheet( 'monsterAnim', 'assets/images/monsterAnima.png', 70, 74 );
 	//game.load.spritesheet('spriteSheetName', 'yoursprite.png', yourframewidth, yourframeheight, yournumberofframes);
 	game.load.spritesheet( 'foodAnim', 'assets/images/foodSpriteSheet.png', 15, 88, 28);
 	// This adds the Phaser Isometric Plugin
@@ -873,7 +878,7 @@ function rndNum( num ) {
 // newTiles is the function responsible for changing the biome when you wrap
 function newTiles(){
 	obstacleGroup.forEach(function(tile){
-		if (tile.key == 'playerAnim' || tile.key == 'monsterTemp'){
+		if (tile.key == 'playerAnim' || tile.key == 'monsterAnim'){
 			console.log('dont fuck with me')
 		} else {
 			tile.destroy();
@@ -1043,15 +1048,22 @@ function monsterManager(){
 		}
 	}
 
-	if (monsterSpawned == true && hidden == false){
-		chase = true;
+	if (monsterSpawned == true && playerHiding == false){
+		if (playerKilled === false){
+			chase = true;
+		}
+	}
+
+	if (monsterSpawned === true){
+		monster.animations.play('active');
 	}
 }
 
 function initMonster(){
-	monster = game.add.isoSprite( 0, 0, 0, 'monsterTemp', 0, obstacleGroup);
+	monster = game.add.isoSprite( 0, 0, 0, 'monsterAnim', 0, obstacleGroup);
 	//monster animations will go here
-
+	monster.animations.add('active', [0, 1, 2, 3, 4, 5, 6, 7], 10, true);
+	monster.animations.add('dying', [8, 9, 10, 11, 12, 13, 14, 15], 10, false);
 
 	monster.alpha = 0;
 	game.time.events.loop(Phaser.Timer.SECOND*1.5, function(){
@@ -1125,7 +1137,6 @@ function monsterAI(){
 				   }
 			   } else {
 				   if (chase == false){
-					   console.log('monster returning near player')
 					   if (monster.body.x > player.body.x && monster.body.y > player.body.y){
 						   monster.body.velocity.x = -monsterSpeed;
 						   monster.body.velocity.y = -monsterSpeed;
@@ -1154,7 +1165,7 @@ function monsterAI(){
 				   }
 			   }
 			   if (chase == true){
-				   console.log("monster coming to kill player")
+				   console.log('hes coming')
 				   if (monster.body.x > player.body.x && monster.body.y > player.body.y){
 					   monster.body.velocity.x = -monsterSpeed;
 					   monster.body.velocity.y = -monsterSpeed;
@@ -1182,7 +1193,6 @@ function monsterAI(){
 				   }
 			   }
 		   } else {
-			   console.log('monster blocked');
 			   if (monsterRnd == 1) {
 				  monster.body.velocity.y = -monsterSpeed;
 				  monster.body.velocity.x = -monsterSpeed;
@@ -1241,10 +1251,10 @@ function initPlayer() {
 	player.animations.add('W', [16, 17, 18, 19, 20, 21, 22, 23], 10, true);
 	player.animations.add('NW', [24, 25, 26, 27, 28, 29, 30, 31], 10, true);
 	player.animations.add('N', [32, 33, 34, 35, 36, 37, 38, 39], 10, true);
-	player.animations.add('NE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
+	player.animations.add('NE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
 	player.animations.add('E', [48, 49, 50, 51, 52, 53, 54, 55], 10, true);
-	player.animations.add('SE', [56, 57, 58, 59, 60, 61, 62, 63], 10, true);
-	player.animations.add('HIDE'[64,65,66,67,68], 10, true);
+	player.animations.add('SE', [40, 41, 42, 43, 44, 45, 46, 47], 10, true);
+	player.animations.add('HIDE', [64, 65, 66, 67, 68, 69, 70, 71], 10, false);
 
 
 	// SEstep = game.add.isoSprite(0, 0, 0, 'SEstep', 0, stepGroup);
@@ -1272,6 +1282,7 @@ function actionPlayer(){
 		player.body.velocity.y = 0;
 	} else if (digging == false){
 		if (hideCounter == 5){
+			hidden = true;
 			playerHiding = true;
 			hideCounter = 0;
 		}
@@ -1327,8 +1338,9 @@ function inputDown(key){
 	// digging mechanic: if space is pressed then player is digging
 	// *****Must add animation for digging
 	keyCounter ++;
-	if (hidden === true){
+	if (playerHiding == true){
 		if (key === shift || key === up || key === down || key === left || key === right){
+			console.log(hidden);
 			hidden = false
 		}
 	} else {
@@ -1416,32 +1428,40 @@ function playerAnim(){
 			player.animations.play('N');
 	} else if (playerHiding == true){
 			player.animations.play('HIDE');
-			hidden = true;
 			if (obscureFilter.alpha < 1){
 			obscureFilter.alpha += 0.01;
 			}
-			if (player.frame == 66){
-				player.animations.paused = true;
-				if (hidden == false){
+			if (player.frame == 68){
+				if (hidden == true){
+					player.animations.paused = true;
+				}else {
 					player.animations.paused = false;
+					player.frame = 69;
 				}
 			}
-			player.animations.currentAnim.onComplete.add(function() {
+			player.events.onAnimationComplete.add(function() {
 				if (obscureFilter.alpha > 0){
 					obscureFilter.alpha -= 0.01;
 				} else {
 					playerHiding = false;
 				}; }, this);
 	} else {
-	       	player.animations.stop();
+	       	player.animations.play('idle');
+	}
+	if (monsterDistance < 60){
+		returningMonster = false;
 	}
 	if (monsterDistance < 35){
 		//hidden might/should be playerHiding
-
 		if (hidden == false && monsterSpawned == true ){
 			//add monster killing player animation here
-
+			bloodSplatter = game.add.isoSprite( player.body.x, player.body.y, 0, 'killedHare', 0, centerGroup );
+			bloodSplatter.anchor.setTo( anchorPoint, 0 );
+			game.physics.isoArcade.enable( bloodSplatter );
+			bloodSplatter.body.collideWorldBounds = true;
 			player.kill();
+			playerKilled = true;
+			hidden = true;
 			chase = false;
 		}
 	}
@@ -1490,109 +1510,109 @@ function spawnTiles() {
 }
 
 function spawnBiome(){
-// mapBiom();
-// 	for ( let i = 0; i < worldMap.length; i ++) {
-// 		for ( let j = 0; j < worldMap[i].length; j ++ ) {
-// 			if (worldMap[i][j] === 'w'){
-// 				water = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'water', 0, obstacleGroup );
-// 				water.anchor.setTo( anchorPoint, 0 );
-// 				game.physics.isoArcade.enable( water );
-// 				water.body.collideWorldBounds = true;
-// 				water.body.immovable = true;
-// 			}
-// 			if (worldMap[i][j] === 'r'){
-// 				rock = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'rock', 0, obstacleGroup );
-// 				rock.anchor.setTo( anchorPoint, 0 );
-// 				game.physics.isoArcade.enable( rock );
-// 				rock.body.collideWorldBounds = true;
-// 				rock.body.immovable = true;
-// 			}
-// 		}
-// 	}
-// }
-for ( let i = 0; i < worldSize; i += 70 ) {
-	for ( let j = 0; j < worldSize; j += 70 ) {
-		let rnd = rndNum(40);
-		if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
-			//don't spawn anything here
-		} else if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
-			//don't spawn anything here either
-		} else if ((i <= 1050) && (j <= 1050)){
-			if (specialLakeEvent == true){
-				for ( let g = 0; g < specialLake.length; g ++) {
-						for ( let h = 0; h < specialLake[g].length; h ++ ) {
-							if (specialLake[g][h] === 'w'){
-								water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water1', 0, obstacleGroup);
-								water.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( water );
-								water.body.collideWorldBounds = true;
-								water.body.immovable = true;
-							}
-							if (specialLake[g][h] === 'b'){
-								water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water3', 0, obstacleGroup);
-								water.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( water );
-								water.body.collideWorldBounds = true;
-								water.body.immovable = true;
-							}
-							if (specialLake[g][h] === 'L'){
-								rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow2', 0, eventGroup );
-								rock.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( rock );
-								rock.body.collideWorldBounds = true;
-								rock.body.immovable = true;
-							}
-							if (specialLake[g][h] === 'Li'){
-								artifact1 = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'artifact1', 0, obstacleGroup );
-								artifact1.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( artifact1 );
-								artifact1.body.collideWorldBounds = true;
-								rock = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow3', 0, isoGroup );
-								rock.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( rock );
-								rock.body.collideWorldBounds = true;
-								rock.body.immovable = true;
-							}
-							if (specialLake[g][h] === 'r'){
-								rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Rock2', 0, obstacleGroup );
-								rock.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( rock );
-								rock.body.collideWorldBounds = true;
-								rock.body.immovable = true;
+	// mapBiom();
+	// 	for ( let i = 0; i < worldMap.length; i ++) {
+	// 		for ( let j = 0; j < worldMap[i].length; j ++ ) {
+	// 			if (worldMap[i][j] === 'w'){
+	// 				water = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'water', 0, obstacleGroup );
+	// 				water.anchor.setTo( anchorPoint, 0 );
+	// 				game.physics.isoArcade.enable( water );
+	// 				water.body.collideWorldBounds = true;
+	// 				water.body.immovable = true;
+	// 			}
+	// 			if (worldMap[i][j] === 'r'){
+	// 				rock = game.add.isoSprite( i * TILESIZE/2, j * TILESIZE/2, 0, 'rock', 0, obstacleGroup );
+	// 				rock.anchor.setTo( anchorPoint, 0 );
+	// 				game.physics.isoArcade.enable( rock );
+	// 				rock.body.collideWorldBounds = true;
+	// 				rock.body.immovable = true;
+	// 			}
+	// 		}
+	// 	}
+	// }
+	for ( let i = 0; i < worldSize; i += 70 ) {
+		for ( let j = 0; j < worldSize; j += 70 ) {
+			let rnd = rndNum(40);
+			if ((i >= 1368 && i <= 2280) && (j >= 1368 && j <= 2280)){
+				//don't spawn anything here
+			} else if ((i >= 0 && j <= 456) || (i <= 456 && j >= 0) || (i >= 3192 && j <= 3800) || (i <= 3800 && j >= 3192)) {
+				//don't spawn anything here either
+			} else if ((i <= 1050) && (j <= 1050)){
+				if (specialLakeEvent == true){
+					for ( let g = 0; g < specialLake.length; g ++) {
+							for ( let h = 0; h < specialLake[g].length; h ++ ) {
+								if (specialLake[g][h] === 'w'){
+									water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water1', 0, obstacleGroup);
+									water.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( water );
+									water.body.collideWorldBounds = true;
+									water.body.immovable = true;
+								}
+								if (specialLake[g][h] === 'b'){
+									water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water3', 0, obstacleGroup);
+									water.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( water );
+									water.body.collideWorldBounds = true;
+									water.body.immovable = true;
+								}
+								if (specialLake[g][h] === 'L'){
+									rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow2', 0, eventGroup );
+									rock.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( rock );
+									rock.body.collideWorldBounds = true;
+									rock.body.immovable = true;
+								}
+								if (specialLake[g][h] === 'Li'){
+									artifact1 = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'artifact1', 0, obstacleGroup );
+									artifact1.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( artifact1 );
+									artifact1.body.collideWorldBounds = true;
+									rock = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Snow3', 0, isoGroup );
+									rock.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( rock );
+									rock.body.collideWorldBounds = true;
+									rock.body.immovable = true;
+								}
+								if (specialLake[g][h] === 'r'){
+									rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Rock2', 0, obstacleGroup );
+									rock.anchor.setTo( anchorPoint, 0 );
+									game.physics.isoArcade.enable( rock );
+									rock.body.collideWorldBounds = true;
+									rock.body.immovable = true;
+								}
 							}
 						}
+					specialLakeEvent = false;
 					}
-				specialLakeEvent = false;
-				}
-			} else {
-				if ( rnd == 1 ) {
-					water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-					water.anchor.setTo( anchorPoint, 0 );
-					game.physics.isoArcade.enable( water );
-					water.body.collideWorldBounds = true;
-					water.body.immovable = true;
-				} else if (rnd == 2){
-					rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
-					rock.anchor.setTo( anchorPoint, 0 );
-					game.physics.isoArcade.enable( rock );
-					rock.body.collideWorldBounds = true;
-					rock.body.immovable = true;
-				} else if (rnd == 3){
-					dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
-					dig.anchor.setTo( anchorPoint, 0 );
-					game.physics.isoArcade.enable( dig );
-					dig.body.collideWorldBounds = true;
-				} else if (rnd == 4){
-					rock = game.add.isoSprite( i, j, 0, 'Rock2', 0, obstacleGroup );
-					rock.anchor.setTo( anchorPoint, 0 );
-					game.physics.isoArcade.enable( rock );
-					rock.body.collideWorldBounds = true;
-					rock.body.immovable = true;
+				} else {
+					if ( rnd == 1 ) {
+						water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
+						water.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( water );
+						water.body.collideWorldBounds = true;
+						water.body.immovable = true;
+					} else if (rnd == 2){
+						rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
+						rock.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( rock );
+						rock.body.collideWorldBounds = true;
+						rock.body.immovable = true;
+					} else if (rnd == 3){
+						dig = game.add.isoSprite( i, j, 0, 'dig', 0, eventGroup );
+						dig.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( dig );
+						dig.body.collideWorldBounds = true;
+					} else if (rnd == 4){
+						rock = game.add.isoSprite( i, j, 0, 'Rock2', 0, obstacleGroup );
+						rock.anchor.setTo( anchorPoint, 0 );
+						game.physics.isoArcade.enable( rock );
+						rock.body.collideWorldBounds = true;
+						rock.body.immovable = true;
+					}
 				}
 			}
 		}
 	}
-}
 
 function mapBiom(){
 	uniqueBiome2 = [];
