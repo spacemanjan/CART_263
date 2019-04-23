@@ -57,11 +57,13 @@ let hungerMax = 200;
 //How much food replenishes
 let nutrition = 60;
 let certainDestroy = 0;
+let timesRefresh = 0;
 
 //========GAME-VARIABLES========//
 //The miscelanous variables used in the game
 let title;
 let emitter;
+let blackScreen;
 
 //========FOOD-VARIABLES========//
 //These variables are used by the food functions
@@ -101,7 +103,7 @@ let subtitles = {
 		sound:  'a4'
 	},
 	a5: {
-		subtitle: "Suddenly the hare realized he was starving, he had no idea how long he’d slept but it must have been an awful long time because he was so hungry he could eat all the carrots in the world",
+		subtitle: "the hare realized he was starving, he had no idea how long he’d slept but it must have been an awful long time because he was so hungry he could eat all the carrots in the world",
 		sound:  'a5'
 	},
 	a6: {
@@ -209,7 +211,7 @@ let subtitles = {
 		sound:  'd00'
 	},
 	d000: {
-		subtitle: "“as if by some ancient magik the hare jumped out of his, as the creature charged at him with what the hare assumed was his face he thought he hear a voice ring out from deep in his mind geb ch’gnaiih nog mnahn’ grahn’ stell’bsna r’luh c-shogg y-s’uhn nilgh’ri y-wgah’n… and then nothing more",
+		subtitle: "“As the creature charged at him with what the hare assumed was his face he thought he hear a voice ring out from deep in his mind geb ch’gnaiih nog mnahn’ grahn’ stell’bsna r’luh c-shogg y-s’uhn nilgh’ri y-wgah’n… and then nothing more",
 		sound:  'd000'
 	},
 	d0000: {
@@ -349,6 +351,7 @@ let interuptNar = false;
 let currentSound;
 let standingStill = false;
 let firstDig = false;
+let foodDeath = false;
 
 //========PLAYER-VARIABLES========//
 //Player variables including
@@ -362,6 +365,8 @@ let obscureFilter;
 let dangerFilter;
 let bloodSplatter;
 let playerAlive = true;
+let playerHungerDeath = false;
+let playerEnding = false;
 
 //=========MONSTER-VARIABLES=======//
 let monster;
@@ -375,6 +380,7 @@ let monsterSpawned = false;
 let monsterComing = false;
 let monsterPlaced = false;
 let monsterSound = 0;
+let goFood = false;
 
 //=========KEYBOARD=======//
 let up;
@@ -413,21 +419,21 @@ let worldMap;
 //======SPECIAL-WORLDSTUFF======//
 let specialLakeEvent = true;
 let specialLake = [
-	['w','w','w','w','w','w','w','w','w','w','w','w','w','w','w'],
-	['w','b','b','b','b','b','b','b','b','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','b','L','b','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
-	['w','b','b','b','L','L','L','r','L','L','L','b','b','b','w'],
-	['w','b','b','L','L','L','L','L','L','L','L','L','b','b','w'],
-	['w','b','b','b','L','L','L','Li','L','L','L','b','b','b','w'],
-	['w','b','b','b','b','L','L','L','L','L','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','b','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','L','b','b','b','b','b','w'],
-	['w','b','b','b','b','b','L','L','b','b','b','b','b','b','w'],
-	['w','w','w','w','w','w','L','L','w','w','w','w','w','w','w']
+	['b','b','b','b','b','b','b','b','b','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','b','b','b','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','b','L','b','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','L','b','b','b','b','b','b'],
+	['b','b','b','b','b','L','L','L','L','L','b','b','b','b','b'],
+	['b','b','b','b','L','L','L','r','L','L','L','b','b','b','b'],
+	['b','b','b','L','L','L','L','L','L','L','L','L','b','b','b'],
+	['b','b','b','b','L','L','L','Li','L','L','L','b','b','b','b'],
+	['b','b','b','b','b','L','L','L','L','L','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','L','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','L','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','b','L','L','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','L','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','b','b','b','b','b','b','b'],
+	['b','b','b','b','b','b','L','L','b','b','b','b','b','b','b']
 ]
 let specialRockEvent = true;
 let specialRocks = [
@@ -435,7 +441,7 @@ let specialRocks = [
 	['','','','','r','r','r','','',''],
 	['','','','r','r','r','r','','',''],
 	['','','r','r','sr','','','','',''],
-	['','','','','','a2','','','','']
+	['','','','','','','a2','','','']
 
 ]
 let specialFrozen = [
@@ -541,7 +547,7 @@ function preload() {
 	game.load.audio('dhd',['assets/sounds/dhd Copy.mp3']);
 	game.load.audio('d0',['assets/sounds/d0 Copy.mp3']);
 	game.load.audio('d00',['assets/sounds/d00.mp3']);
-	game.load.audio('d000',['assets/sounds/d000.mp3']);
+	game.load.audio('d000',['assets/sounds/d000 Copy.mp3']);
 	game.load.audio('d00000',['assets/sounds/d00000 Copy.mp3']);
 	game.load.audio('d1',['assets/sounds/d1 Copy.mp3']);
 	game.load.audio('d2',['assets/sounds/d2 Copy.mp3']);
@@ -608,6 +614,8 @@ function preload() {
 	game.load.image ('artifact4', 'assets/images/artifact4.png');
 	game.load.image ('artifact5', 'assets/images/artifact5.png');
 	game.load.image ('killedHare', 'assets/images/monsterDeath.png');
+	game.load.image ('frozenHare', 'assets/images/frozenHare.png');
+	game.load.image ('blackScreen', 'assets/images/Fade2Black.png');
 
 	//-----------ANIMATIONS-----------//
 	game.load.spritesheet( 'playerAnim', 'assets/images/PlayerMovement.png', 70, 74 );
@@ -769,17 +777,19 @@ function update() {
 		}
 		//	titlescreen event if clicked
 		title.events.onInputDown.add( function() {
-			interuptNarrator();
 			console.log(currentSound)
 			// delete titleScreen so it doesn't remain on screen
 			title.destroy();
 			// game begins
 			start = true;
-			narrate('a1')
+			narrative('a1')
 			player.animations.play('WAKE');
 		}, this );
 		// "if game has begun then..."
 	} else {
+
+		//OVERLAP CHECK, is how we check if the player sprite is over the digging tile & leaves paw prints
+		overlapCheck();
 		//-----------FOOD--------------------------//
 		foodHungerManager();
 		//Initiate camera controls (i.e. have camera follow player)
@@ -803,10 +813,6 @@ function update() {
 		game.iso.topologicalSort( obstacleGroup );
 		// game.physics.isoArcade.collide( eventGroup );
 		// game.iso.topologicalSort( eventGroup );
-
-		//OVERLAP CHECK, is how we check if the player sprite is over the digging tile & leaves paw prints
-		overlapCheck();
-
 	}
 
 	// console.log area
@@ -875,21 +881,21 @@ function overlapCheck() {
 			//"check for overlap between the tile passed in the function above & the player & if they overlap perform..."
 			game.physics.isoArcade.overlap( dig, player, function( holeTile, player ) {
 				// if player is digging for food
-				if (narratorState === 2){
-					if (firstDig === false){
-						interuptNarrator();
-						narrate('a6')
-						firstDig = true;
+				if (holeTile.key == 'dig'){
+					//NARRATOR LINE 1/10
+					if (goFood === true){
+						if (firstDig === false){
+							narrative('a6')
+							firstDig = true;
+						}
 					}
 				}
-				if (holeTile.key == 'dig'){
 					if ( digging == true ) {
 						// replace the texture of the tile with a new texture
 						//***have a food item pop up above the players head + fill their food meter (with appropriate level of nutrition)
 						holeTile.loadTexture( 'dug' );
 						chanceFood = true;
 					};
-				}
 			} );
 		} );
 		itemGroup.forEach( function( item ) {
@@ -898,61 +904,58 @@ function overlapCheck() {
 				// if player is digging for food
 				if (narratorState === 2){
 					if (firstDig === false){
-						interuptNarrator();
-						narrate('a6')
+						narrative('a6')
 						firstDig = true;
 					}
 				}
 				item.destroy();
 				if (item.key == 'artifact1'){
-					artifact1 = game.add.sprite(30,20,'artifact1', uiGroup );
+					artifact1 = game.add.sprite(30,20,'artifact1');
 					artifact1.fixedToCamera = true;
 					artifact1.anchor.setTo(anchorPoint, 0);
 					artifact1got = true;
 					numArtifact++;
-					interuptNarrator();
-					narrate('a12')
+					currentSound.stop();
+					narrative('a13')
 				}
 				if (item.key == 'artifact2'){
-					artifact2 = game.add.sprite(60,20,'artifact2', uiGroup );
+					artifact2 = game.add.sprite(60,20,'artifact2' );
 					artifact2.fixedToCamera = true;
 					artifact2.anchor.setTo(anchorPoint, 0);
 					artifact2got = true;
 					numArtifact++;
-					interuptNarrator();
-					narrate('a13')
+					currentSound.stop();
+					narrative('a12')
 				}
 				if (item.key == 'artifact3'){
-					artifact3 = game.add.sprite(90,20,'artifact3', uiGroup );
+					artifact3 = game.add.sprite(90,20,'artifact3');
 					artifact3.fixedToCamera = true;
 					artifact3.anchor.setTo(anchorPoint, 0);
 					artifact3got = true;
 					numArtifact++;
-					interuptNarrator();
-					narrate('a14')
+					currentSound.stop();
+					narrative('f9')
 				}
 				if (item.key == 'artifact4'){
-					artifact4 = game.add.sprite(90,20,'artifact4', uiGroup );
+					artifact4 = game.add.sprite(90,20,'artifact4' );
 					artifact4.fixedToCamera = true;
 					artifact4.anchor.setTo(anchorPoint, 0);
 					artifact4got = true;
 					numArtifact++;
-					interuptNarrator();
-					narrate('a15')
+					currentSound.stop();
+					narrative('a15')
 				}
 				if (item.key == 'artifact5'){
-					artifact5 = game.add.sprite(90,20,'artifact5', uiGroup );
+					artifact5 = game.add.sprite(90,20,'artifact5' );
 					artifact5.fixedToCamera = true;
 					artifact5.anchor.setTo(anchorPoint, 0);
 					artifact5got = true;
 					numArtifact++;
-					interuptNarrator();
-					narrate('a16')
+					currentSound.stop();
+					narrative('a16')
 				}
 				if (numArtifact === 5){
 					finale = true;
-					interuptNarrator();
-					narrate('g7');
 				}
 			} );
 		} );
@@ -991,18 +994,8 @@ function initHunger(){
 	emptyHungerBar.fixedToCamera = true;
 	//Every 10 seconds change the alpha and update hungerMeter
 	game.time.events.loop(Phaser.Timer.SECOND*5, function(){
-		if (narratorState >= 2){
-			if (hungerMeter > 0) {
-				if (narratorState >=4){
-					if (hungerMeter === 150){
-						interuptNarrator();
-						narrate('e1');
-					}
-					if (hungerMeter === 100){
-						interuptNarrator();
-						narrate('e2');
-					}
-				};
+		if (goFood === true){
+			if (hungerMeter > 0){
 				if (justAte == false){
 					if (hidden == true){
 						hungerMeter -= hungerRate*2
@@ -1015,71 +1008,45 @@ function initHunger(){
 			} else {
 				emptyHungerBar.alpha = 1;
 				playerAlive = false;
-				player.animations.play('SLEEP');
-				if (narratorState === 5){
-					interuptNarrator();
-					narrate('d0');
+				if (playerAlive === false && foodDeath === false ){
+					//NARRATOR LINE 1/10
+						narrative('dhd')
+					}
+					playerHungerDeath = true;
+					foodDeath = true;
 				}
 			}
-		}
 	}, this);
 }
 function foodHungerManager(){
 	if (chanceFood == true){
 		let rnd = rndNum(100)
+		chanceFood = false;
 		if (rnd <= 96){
 			food.body.x = player.body.x;
 			food.body.y = player.body.y;
 			food.alpha = 1;
 		}
-		if (rnd >= 25 && rnd < 97){
-			if (narratorState === 2){
-				interuptNarrator();
-				narrate('b3');
-			}
-			if (narratorState === 3){
-				interuptNarrator();
-				narrate('e0')
-				narratorState = 4;
-			}
-		}
 		if (rnd < 25){
+			console.log('puff')
 			food.animations.play('puff');
 		} else if (rnd >= 25 && rnd < 50){
+			console.log('acorn')
 			//You get an acorn, acorn animation, + 15 hungerMeter
 			food.animations.play('acorn');
 			foodSound1.play();
-			if (narratorState >= 5){
-				if (acornSound === false){
-					interuptNarrator();
-					narrate('e000')
-					acornSound = true
-				}
-			}
 			hungerMeter += nutrition/4;
 		} else if (rnd >= 50 && rnd < 75){
+			console.log('potato')
 			//You get a potato, potato animation, + 30 hungerMeter
 			food.animations.play('potato');
 			foodSound2.play();
-			if (narratorState >= 5){
-				if (potatoSound === false){
-					interuptNarrator();
-					narrate('e0000');
-					potatoSound = true;
-				}
-			}
 			hungerMeter += nutrition/2;
 		} else if (rnd >= 75 && rnd < 97){
+			console.log('carrot')
 			//You get a Carrot, carrot animation, + 60 hungerMeter
 			food.animations.play('carrot');
 			foodSound1.play();
-			if (narratorState >= 5){
-				if (carrotSound === false){
-					interuptNarrator();
-					narrate('e00000');
-					carrotSound = true;
-				}
-			}
 			hungerMeter += nutrition;
 		} else if (rnd == 97 || rnd == 98){
 			//artifact 1 animation here
@@ -1094,12 +1061,11 @@ function foodHungerManager(){
 		} else if (rnd == 99 || rnd == 100){
 			//artifact 2 animation here
 
-
 			if (specialDig2 == false){
-				artifact4 = game.add.isoSprite(player.body.x, player.body.y, 0, 'artifact4', 0, itemGroup );
-				artifact4.anchor.setTo( anchorPoint, 0 );
-				game.physics.isoArcade.enable( artifact4 );
-				artifact4.body.collideWorldBounds = true;
+				artifact5 = game.add.isoSprite(player.body.x, player.body.y, 0, 'artifact5', 0, itemGroup );
+				artifact5.anchor.setTo( anchorPoint, 0 );
+				game.physics.isoArcade.enable( artifact5 );
+				artifact5.body.collideWorldBounds = true;
 				specialDig2 = true;
 			} else {
 				food.animations.play('puff');
@@ -1111,7 +1077,6 @@ function foodHungerManager(){
 		}
 		fullHungerBar.alpha = hungerMeter/200
 		emptyHungerBar.alpha = (1 - (hungerMeter/200));
-		chanceFood = false;
 	}
 	//Increase player speed if hunger is between 180 & 200
 	if (hungerMeter > 180){
@@ -1159,65 +1124,35 @@ function narrate(key) {
 		currentSound.onStop.add(narratorManager,this);
 	}
 }
-function narratorManager(sound){
 
-	if (sound.key === 'a1'){
-		narrate('a2')
-	}
-	if (sound.key === 'a2'){
-		narrate('a3')
-	}
-	if (sound.key === 'a3'){
-		if(keyCounter === 0){
-			narrate('b2')
-		} else {
-			narrate('a4')
-		}
-	}
-	if (sound.key === 'a4'){
-		narrate('a5')
-		narratorState = 2;
-	}
-	if (sound.key === 'b3'){
-		narrate('a8')
-		narratorState = 5;
-	}
-	if (sound.key === 'a6'){
-		game.time.events.add(Phaser.Timer.SECOND*5, function(){
-			if (narratorState == 2){
-				narrate('a7')
-				narratorState = 3;
-			}
-		}, this);
-	}
-
-	if (sound.key === 'e0'){
-		narrate('a8')
-	}
-	if (sound.key === 'a8'){
-		game.time.events.add(Phaser.Timer.SECOND*30, function(){
-			if (narratorState === 5){
-				narrate('b4');
-			} else {
-				narrate('a9')
-			}
-		}, this);
-	}
-	if (sound.key === 'd1'){
-		game.time.events.add(Phaser.Timer.SECOND*5, function(){
-			narrate('d2')
-		}, this);
-	}
+function narrative(sound){
+	currentSound.stop();
+	narrate(sound);
 }
 
+function narratorManager(sound){
+	if (sound.key === 'a1'){
+		narrate('a5');
+		goFood = true;
+	}
+	if (sound.key === 'a6'){
+		narrate('a7');
+	}
+	if (sound.key === 'd1'){
+		narrate('d2');
+	}
+	if (sound.key === 'a16','a15','f9','a12','a13' ){
+		if (finale === true){
+			narrate('g7');
+			playerEnding = true;
+		}
+	}
+}
 function createSubtitles(){
 	let style = { font: "18px Arial", fill: "#000000", align: "center", wordWrap: true, wordWrapWidth: 600};
 	subtitle = game.add.text(game.camera.x+20, game.camera.y+450, 'crunchy', style);
 	subtitle.fixedToCamera= true;
 	game.sound.setDecodedCallback([ currentSound ], start, this);
-}
-function interuptNarrator(){
-	currentSound.stop();
 }
 
 //=======MONSTER-FUNCTIONS=========//
@@ -1233,26 +1168,10 @@ function monsterManager(){
 		} else {
 			dangerFilter.alpha -= 0.05;
 		}
+		//NARRATOR LINE 1/10
 		if (dangerState === 0){
-			interuptNarrator();
-			narrate('d1')
+			narrative('d1')
 			dangerState = 1
-		} else if (dangerState === 2 ){
-			interuptNarrator();
-			narrate('d5')
-			dangerState = 3
-		} else if (dangerState === 3 ){
-			interuptNarrator();
-			narrate('d6')
-			dangerState = 4
-		} else if (dangerState === 4){
-			interuptNarrator();
-			narrate('d7')
-			dangerState = 5
-		} else if (dangerState === 5){
-			interuptNarrator();
-			narrate('d8')
-			dangerState = 6
 		}
 	} else {
 		if (dangerFilter.alpha > 0) {
@@ -1260,6 +1179,12 @@ function monsterManager(){
 		}
 	}
 
+	if (dangerState === 2){
+		if (playerAlive === true){
+			narrative('a10')
+			dangerState = 3
+		}
+	}
 	if (monsterSpawned == true && playerHiding == false){
 		if (playerKilled === false){
 			chase = true;
@@ -1295,19 +1220,12 @@ function initMonster(){
 			}, this);
 		};
 		if (monsterSpawned == true){
-			game.time.events.add(Phaser.Timer.SECOND*90, function(){
+			game.time.events.add(Phaser.Timer.SECOND*30, function(){
 				monsterSpawned = false;
-				monsterSound = 0;
-				if (narratorState === 6){
-					if (dangeState === 2){
-						interuptNarrator();
-						narrate('a11');
-					} else {
-						interuptNarrator();
-						narrate('a10')
-						narratorState = 7;
-					}
+				if (dangerState === 1){
+					dangerState = 2
 				}
+				monsterSound = 0;
 			}, this);
 		}
 	}, this);
@@ -1546,67 +1464,57 @@ function actionPlayer(){
 function inputDown(key){
 	// digging mechanic: if space is pressed then player is digging
 	// *****Must add animation for digging
-	if (narratorState === 5){
-		if (key === shift || key === up || key === down || key === left || key === right){
-			narratorState = 6;
-		}
-	}
-	keyCounter ++;
-	if (playerHiding == true){
-		if (key === shift || key === up || key === down || key === left || key === right){
-			hidden = false
-			if (dangerState === 1){
-				interuptNarrator();
-				narrate('d00')
+	if (playerAlive === true){
+		keyCounter ++;
+		if (playerHiding == true){
+			if (key === shift || key === up || key === down || key === left || key === right){
+				hidden = false
 			}
-			if (dangerState === 2){
-				interuptNarrator();
-				narrate('d000')
+		} else {
+			if (key === space){
+				digging = true;
+			}
+			// shift adds 1 to the hideCounter
+			if (key === shift){
+				if (shiftDown == false){
+					hideCounter ++;
+				}
+				shiftDown = true;
+			}
+			if (key === up){
+				NEdown = true;
+			}
+			if (key === down){
+				SWdown = true;
+			}
+			if (key === left){
+				NWdown = true;
+			}
+			if (key === right){
+				SEdown = true;
+			}
+			if (NWdown == true && NEdown == true ){
+				NEdown = false;
+				NWdown = false;
+				Ndown = true;
+			}
+			if (NEdown == true && SEdown == true ){
+				NEdown = false;
+				SEdown = false;
+				Edown = true;
+			}
+			if (NWdown == true && SWdown == true ){
+				NWdown = false;
+				SWdown = false;
+				Wdown = true;
+			}
+			if (SWdown == true && SEdown == true ){
+				SWdown = false;
+				SEdown = false;
+				Sdown = true;
 			}
 		}
 	} else {
-		if (key === space){
-			digging = true;
-		}
-		// shift adds 1 to the hideCounter
-		if (key === shift){
-			if (shiftDown == false){
-				hideCounter ++;
-			}
-			shiftDown = true;
-		}
-		if (key === up){
-			NEdown = true;
-		}
-		if (key === down){
-			SWdown = true;
-		}
-		if (key === left){
-			NWdown = true;
-		}
-		if (key === right){
-			SEdown = true;
-		}
-		if (NWdown == true && NEdown == true ){
-			NEdown = false;
-			NWdown = false;
-			Ndown = true;
-		}
-		if (NEdown == true && SEdown == true ){
-			NEdown = false;
-			SEdown = false;
-			Edown = true;
-		}
-		if (NWdown == true && SWdown == true ){
-			NWdown = false;
-			SWdown = false;
-			Wdown = true;
-		}
-		if (SWdown == true && SEdown == true ){
-			SWdown = false;
-			SEdown = false;
-			Sdown = true;
-		}
 	}
 }
 function inputUp(key){
@@ -1644,9 +1552,6 @@ function playerAnim(){
 			player.animations.play('N');
 	} else if (playerHiding == true){
 			player.animations.play('HIDE');
-			if (dangerState === 0){
-				dangerState = 1;
-			}
 			if (obscureFilter.alpha < 1){
 			obscureFilter.alpha += 0.01;
 			}
@@ -1664,20 +1569,38 @@ function playerAnim(){
 				} else {
 					playerHiding = false;
 				}; }, this);
-	} else {
-	       	player.animations.play('IDLE');
-	}
+			} else if (playerHungerDeath == true){
+				artifactAlphaZero();
+				player.animations.play('SLEEP')
+				if (blackScreen.alpha < 1){
+					blackScreen.alpha += 0.001;
+				}
+				if (player.frame == 95){
+					player.animations.paused = true;
+				}
+			} else if (playerEnding === true){
+				artifactAlphaZero();
+				player.animations.play('SLEEP')
+				if (blackScreen.alpha < 1){
+					blackScreen.alpha += 0.001;
+				}
+				if (player.frame == 95){
+					player.animations.paused = true;
+				}
+			} else if (playerKilled === true){
+				artifactAlphaZero();
+				if (blackScreen.alpha < 1){
+					blackScreen.alpha += 0.001;
+				}
+			} else {
+		       	player.animations.play('IDLE');
+		}
 	if (monsterDistance < 60){
 		returningMonster = false;
-		if (dangerState === 1){
-			interuptNarrator();
-			narrate('d4')
-			dangerState = 2;
-		}
 	}
 	if (monsterDistance < 35){
 		//hidden might/should be playerHiding
-		if (hidden == false && monsterSpawned == true ){
+		if (hidden === false && monsterSpawned === true && playerEnding === false){
 			//add monster killing player animation here
 			bloodSplatter = game.add.isoSprite( player.body.x, player.body.y, 0, 'killedHare', 0, centerGroup );
 			bloodSplatter.anchor.setTo( anchorPoint, 0 );
@@ -1688,10 +1611,8 @@ function playerAnim(){
 			playerKilled = true;
 			hidden = true;
 			chase = false;
-			if (dangerState === 0){
-				interuptNarrator();
-				narrate('b5')
-			}
+			//NARRATOR LINE 1/10
+				narrative('d000')
 		}
 	}
 }
@@ -1705,6 +1626,11 @@ function initFilters(){
 	dangerFilter.fixedToCamera = true;
 	dangerFilter.scale.setTo(0.4,0.4);
 	dangerFilter.alpha = 0;
+
+	blackScreen = game.add.sprite( game.camera.x-55, game.camera.y-40, 'blackScreen');
+	blackScreen.fixedToCamera = true;
+	blackScreen.scale.setTo(1,1);
+	blackScreen.alpha = 0;
 }
 
 //=========WORLD-MAKING-FUNCTIONS============//
@@ -1724,11 +1650,15 @@ function newTiles(){
 	eventGroup.forEach(function(tile){
 		tile.destroy();
 	});
+	itemGroup.forEach(function(tile){
+		tile.destroy();
+	});
 	certainDestroy ++;
 	newTiles();
 	} else {
 		certainDestroy = 0
 		spawnBiome();
+		timesRefresh++;
 	}
 }
 function spawnTiles() {
@@ -1789,7 +1719,12 @@ function spawnBiome(){
 	// 		}
 	// 	}
 	// }
-	let rndSpecial = rndNum(5);
+	let rndSpecial;
+	if (timesRefresh < 2){
+		rndSpecial = 0;
+	} else {
+	rndSpecial = rndNum(5);
+	}
 	for ( let i = 0; i < worldSize; i += 70 ) {
 		for ( let j = 0; j < worldSize; j += 70 ) {
 			let rnd = rndNum(40);
@@ -1802,13 +1737,6 @@ function spawnBiome(){
 					if (specialLakeEvent == true){
 						for ( let g = 0; g < specialLake.length; g ++) {
 								for ( let h = 0; h < specialLake[g].length; h ++ ) {
-									if (specialLake[g][h] === 'w'){
-										water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water1', 0, obstacleGroup);
-										water.anchor.setTo( anchorPoint, 0 );
-										game.physics.isoArcade.enable( water );
-										water.body.collideWorldBounds = true;
-										water.body.immovable = true;
-									}
 									if (specialLake[g][h] === 'b'){
 										water = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Water3', 0, obstacleGroup);
 										water.anchor.setTo( anchorPoint, 0 );
@@ -1841,13 +1769,7 @@ function spawnBiome(){
 						}
 					specialLakeEvent = false;
 				} else {
-						if ( rnd == 1 ) {
-							water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-							water.anchor.setTo( anchorPoint, 0 );
-							game.physics.isoArcade.enable( water );
-							water.body.collideWorldBounds = true;
-							water.body.immovable = true;
-						} else if (rnd == 2){
+						if (rnd == 2){
 							rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
 							rock.anchor.setTo( anchorPoint, 0 );
 							game.physics.isoArcade.enable( rock );
@@ -1882,14 +1804,14 @@ function spawnBiome(){
 												rock.body.immovable = true;
 											}
 											if (specialRocks[g][h] === 'sr'){
-												rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Rock2', 0, obstacleGroup );
+												rock = game.add.isoSprite( ((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'Tree1', 0, obstacleGroup );
 												rock.anchor.setTo( anchorPoint, 0 );
 												game.physics.isoArcade.enable( rock );
 												rock.body.collideWorldBounds = true;
 												rock.body.immovable = true;
 											}
 											if (specialRocks[g][h] === 'a2'){
-												artifact2 = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'artifact1', 0, itemGroup );
+												artifact2 = game.add.isoSprite(((i + g*TILESIZE)/2)+315, ((j + h*TILESIZE)/2)+315, 0, 'artifact2', 0, itemGroup );
 												artifact2.anchor.setTo( anchorPoint, 0 );
 												game.physics.isoArcade.enable( artifact2 );
 												artifact2.body.collideWorldBounds = true;
@@ -1899,13 +1821,7 @@ function spawnBiome(){
 							}
 						specialRockEvent = false;
 					} else {
-							if ( rnd == 1 ) {
-								water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-								water.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( water );
-								water.body.collideWorldBounds = true;
-								water.body.immovable = true;
-							} else if (rnd == 2){
+							if (rnd == 2){
 								rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
 								rock.anchor.setTo( anchorPoint, 0 );
 								game.physics.isoArcade.enable( rock );
@@ -1933,7 +1849,7 @@ function spawnBiome(){
 										if (specialFrozen[g][h] === ''){
 										}
 										if (specialFrozen[g][h] === 'f'){
-											rock = game.add.isoSprite( ((i + g*TILESIZE)/2), ((j + h*TILESIZE)/2), 0, 'Rock2', 0, itemGroup );
+											rock = game.add.isoSprite( ((i + g*TILESIZE)/2), ((j + h*TILESIZE)/2), 0, 'frozenHare', 0, itemGroup );
 											rock.anchor.setTo( anchorPoint, 0 );
 											game.physics.isoArcade.enable( rock );
 											rock.body.collideWorldBounds = true;
@@ -1951,13 +1867,7 @@ function spawnBiome(){
 						}
 						specialFrozenHare = false;
 					} else {
-							if ( rnd == 1 ) {
-								water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-								water.anchor.setTo( anchorPoint, 0 );
-								game.physics.isoArcade.enable( water );
-								water.body.collideWorldBounds = true;
-								water.body.immovable = true;
-							} else if (rnd == 2){
+						 	if (rnd == 2){
 								rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
 								rock.anchor.setTo( anchorPoint, 0 );
 								game.physics.isoArcade.enable( rock );
@@ -1977,13 +1887,7 @@ function spawnBiome(){
 							}
 						}
 				} else {
-					if ( rnd == 1 ) {
-						water = game.add.isoSprite( i, j, 0, 'water', 0, obstacleGroup );
-						water.anchor.setTo( anchorPoint, 0 );
-						game.physics.isoArcade.enable( water );
-						water.body.collideWorldBounds = true;
-						water.body.immovable = true;
-					} else if (rnd == 2){
+		 			if (rnd == 2){
 						rock = game.add.isoSprite( i, j, 0, 'Rock1', 0, obstacleGroup );
 						rock.anchor.setTo( anchorPoint, 0 );
 						game.physics.isoArcade.enable( rock );
@@ -2035,8 +1939,10 @@ function spawnBorder(){
 	}
 }
 
-
-//function endingScene(){}
-
-//initArtifacts
-//function initArtifacts(){}
+function artifactAlphaZero(){
+	artifact1.alpha = 0;
+	artifact2.alpha = 0;
+	artifact3.alpha = 0;
+	artifact4.alpha = 0;
+	artifact5.alpha = 0;
+}
